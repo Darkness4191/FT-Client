@@ -60,7 +60,6 @@ public class LoginBar extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String s = new String(passwordField.getPassword());
-        passwordField.setText("");
 
         if(!textField.getText().equals("") && !hostField.getText().equals("") && !s.equals("")) {
             try {
@@ -73,6 +72,7 @@ public class LoginBar extends JPanel implements ActionListener {
                 String jsons = gson.toJson(container);
                 ut.saveInfoToAppdata("FTPClient", "login_details", jsons);
             } catch (UnsupportedLookAndFeelException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException unsupportedLookAndFeelException) {
+                parent.uninit();
                 unsupportedLookAndFeelException.printStackTrace();
             }
         } else {

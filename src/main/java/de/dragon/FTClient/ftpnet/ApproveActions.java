@@ -58,6 +58,7 @@ public class ApproveActions implements ActionListener {
                             failed++;
                         }
                     } catch (IOException ioException) {
+                        frame.uninit();
                         ioException.printStackTrace();
                     }
                 }
@@ -76,6 +77,7 @@ public class ApproveActions implements ActionListener {
                         try {
                             parser.getConnector().getClient().deleteFile(parser.getConnector().getClient().printWorkingDirectory() + "/" + selectedFiles[i].getName());
                         } catch (IOException ioException) {
+                            frame.uninit();
                             ioException.printStackTrace();
                         }
                     }
@@ -83,11 +85,14 @@ public class ApproveActions implements ActionListener {
                     frame.getFtpChooser().setCursor(null);
 
                     JOptionPane.showMessageDialog(null, String.format("Deleted %d files", selectedFiles.length), "Info", JOptionPane.INFORMATION_MESSAGE);
+
                     try {
                         frame.refreshView();
                     } catch (IOException ioException) {
+                        frame.uninit();
                         ioException.printStackTrace();
                     }
+
                     frame.setTask(Task.download);
                 }
             }

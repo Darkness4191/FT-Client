@@ -35,7 +35,7 @@ public class Parser implements PropertyChangeListener {
 
         File poss = new File(currentDir.contains(filename) ? currentDir : currentDir + File.separator + filename);
 
-        if(poss.exists()) {
+        if (poss.exists()) {
             DebugPrinter.println(String.format("Returning temp " + (isDirectory ? "folder" : "file") + " at %s", currentDir.contains(filename) ? currentDir : currentDir + File.separator + filename));
             return poss;
         } else {
@@ -44,15 +44,11 @@ public class Parser implements PropertyChangeListener {
         }
     }
 
-    public FTPFile parseFTPFileBack(File file)  {
-        try {
-            for(FTPFile c : connector.getClient().listFiles()) {
-                if(c.getName().equals(file.getName())) {
-                    return c;
-                }
+    public FTPFile parseFTPFileBack(File file) throws IOException {
+        for (FTPFile c : connector.getClient().listFiles()) {
+            if (c.getName().equals(file.getName())) {
+                return c;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         return null;
@@ -79,7 +75,7 @@ public class Parser implements PropertyChangeListener {
                         currentDir += File.separator + f.getName();
                         refreshView();
                         parseFile("^^^", true);
-                    } else if(new File(currentDir).getParentFile().getAbsolutePath().contains(frame.token) && f.getName().equals("^^^")){
+                    } else if (new File(currentDir).getParentFile().getAbsolutePath().contains(frame.token) && f.getName().equals("^^^")) {
                         DebugPrinter.println("Status: Changing to parent directory " + f.getName());
                         connector.getClient().changeToParentDirectory();
                         currentDir = new File(currentDir).getParentFile().getAbsolutePath();
@@ -87,6 +83,7 @@ public class Parser implements PropertyChangeListener {
                     }
 
                 } catch (IOException e) {
+                    frame.uninit();
                     e.printStackTrace();
                 }
             }
@@ -94,8 +91,8 @@ public class Parser implements PropertyChangeListener {
     }
 
     private boolean conainsName(String folder, String name) {
-        for(File c : new File(folder).listFiles()) {
-            if(c.getName().equals(name)) {
+        for (File c : new File(folder).listFiles()) {
+            if (c.getName().equals(name)) {
                 return true;
             }
         }
@@ -103,8 +100,8 @@ public class Parser implements PropertyChangeListener {
     }
 
     private boolean conainsName(FTPFile[] files, String name) {
-        for(FTPFile c : files) {
-            if(c.getName().equals(name)) {
+        for (FTPFile c : files) {
+            if (c.getName().equals(name)) {
                 return true;
             }
         }
@@ -112,13 +109,13 @@ public class Parser implements PropertyChangeListener {
     }
 
     public void refreshView() throws IOException {
-        if(currentDir.contains(frame.PATH_TO_TEMP)) {
+        if (currentDir.contains(frame.PATH_TO_TEMP)) {
             File current = new File(currentDir);
 
             FTPFile[] list = connector.getClient().listFiles();
 
-            for(File c : current.listFiles()) {
-                if(!conainsName(list, c.getName()) && !c.getName().equals("^^^")) {
+            for (File c : current.listFiles()) {
+                if (!conainsName(list, c.getName()) && !c.getName().equals("^^^")) {
                     ut.deleteFileRec(c);
                 }
             }

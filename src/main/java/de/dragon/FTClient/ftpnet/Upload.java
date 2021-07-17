@@ -15,6 +15,8 @@ public class Upload implements Runnable {
     private ArrayBlockingQueue<File> uploadQueue;
     private Thread uploadThread;
 
+    private boolean closed = false;
+
     public Upload(Parser parser) {
         this.connector = parser.getConnector();
         this.parser = parser;
@@ -31,7 +33,7 @@ public class Upload implements Runnable {
 
     @Override
     public void run() {
-        while(true) {
+        while(!closed) {
             try {
                 upload(uploadQueue.take());
                 parser.refreshView();

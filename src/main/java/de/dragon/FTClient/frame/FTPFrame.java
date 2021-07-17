@@ -84,7 +84,9 @@ public class FTPFrame {
             printToConsole("Connected", Color.WHITE);
         } catch(IOException e) {
             printToConsole("Error: Connection failed:", Color.RED);
-            printToConsole(connector.getClient().getStatus(), Color.WHITE);
+            if(connector != null) {
+                printToConsole(connector.getClient().getStatus(), Color.WHITE);
+            }
         }
 
         parser = new Parser(connector, this);
@@ -107,6 +109,26 @@ public class FTPFrame {
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, filelister);
         splitPane.setDividerLocation(23);
         splitPane.setDividerSize(0);
+
+        buildFrame(splitPane);
+    }
+
+    public void uninit() {
+        connector = null;
+        parser = null;
+        upload = null;
+        approveActions = null;
+        ftpChooser = null;
+        filelister = null;
+        PATH_TO_TEMP = null;
+        RELATIVE_PATH_TO_TEMP = null;
+        token = null;
+        con.flushConsole();
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
+        splitPane.setDividerLocation(23);
+        splitPane.setDividerSize(0);
+        splitPane.setBackground(Console.DefaultBackground);
 
         buildFrame(splitPane);
     }

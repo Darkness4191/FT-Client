@@ -19,8 +19,9 @@ public class Connector {
         client.execPROT("P");
         client.login(user, pass);
 
-        client.setControlKeepAliveTimeout(200);
+        client.setControlKeepAliveTimeout(100);
         client.setKeepAlive(true);
+        client.sendNoOp();
 
         client.setListHiddenFiles(false);
 
