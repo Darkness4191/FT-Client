@@ -1,20 +1,19 @@
 package de.dragon.FTClient.frame;
 
 import de.dragon.FTClient.ftpnet.Connector;
-import de.dragon.FTClient.ftpnet.Download;
+import de.dragon.FTClient.ftpnet.ApproveActions;
 import de.dragon.FTClient.ftpnet.Parser;
 import de.dragon.FTClient.ftpnet.Upload;
+import de.dragon.FTClient.menu.MenuBar;
 import de.dragon.FTClient.misc.DropListener;
 import de.dragon.UsefulThings.console.Console;
 import de.dragon.UsefulThings.dir.DeleteOnExitReqCall;
 import de.dragon.UsefulThings.misc.DebugPrinter;
 import de.dragon.UsefulThings.ut;
+import org.apache.commons.net.ftp.FTPSClient;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicFileChooserUI;
 import java.awt.*;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -30,10 +29,10 @@ public class FTPFrame {
     private JFileChooser ftpChooser;
     private JFileChooser homeChooser;
     private JComponent filelister;
-    private Menubar menu;
+    private LoginBar menu;
     private Parser parser;
     private Connector connector;
-    private Download download;
+    private ApproveActions approveActions;
     private Upload upload;
     private DropListener dropTarget;
 
@@ -41,6 +40,7 @@ public class FTPFrame {
     private Console con;
 
     private JComponent lastPainted;
+    private Task task;
 
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -50,7 +50,7 @@ public class FTPFrame {
         con.setEditable(false);
 
         //menubar
-        menu = new Menubar(this);
+        menu = new LoginBar(this);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
         splitPane.setDividerLocation(24);
         splitPane.setDividerSize(0);
@@ -79,6 +79,7 @@ public class FTPFrame {
 
         //login
         printToConsole("Connecting...", Color.WHITE);
+
         try {
             connector = new Connector(c.getHost(), c.getUser(), c.getPass());
             printToConsole("Connected", Color.WHITE);
@@ -86,14 +87,16 @@ public class FTPFrame {
             printToConsole("Error: Connection failed:", Color.RED);
             printToConsole(connector.getClient().getStatus(), Color.WHITE);
         }
+
         parser = new Parser(connector, this);
-        download = new Download(parser);
+        approveActions = new ApproveActions(parser);
+        upload = new Upload(parser);
 
         //droplistener
-        upload = new Upload(parser);
         dropTarget = new DropListener(upload);
         ftpChooser.addPropertyChangeListener(parser);
-        ftpChooser.addActionListener(download);
+        ftpChooser.addActionListener(approveActions);
+        setTask(Task.download);
         filelister.setDropTarget(dropTarget);
         DebugPrinter.println(filelister.getClass().getName());
 
@@ -131,6 +134,9 @@ public class FTPFrame {
             }
         });
 
+        //add Menubar
+        frame.setJMenuBar(new MenuBar(this));
+
         frame.setVisible(true);
         frame.revalidate();
     }
@@ -151,8 +157,31 @@ public class FTPFrame {
         }
     }
 
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        switch (task) {
+            case download -> ftpChooser.setApproveButtonText("Download");
+            case delete -> ftpChooser.setApproveButtonText("Delete");
+        }
+
+        this.task = task;
+    }
+
+    public FTPSClient getClient() {
+        return connector.getClient();
+    }
+
     public JFileChooser getFtpChooser() {
         return ftpChooser;
+    }
+
+    public void refreshView() throws IOException {
+        if(parser != null) {
+            parser.refreshView();
+        }
     }
 
     public void addActionListener(ActionListener listener) {
@@ -161,6 +190,10 @@ public class FTPFrame {
 
     public Console getConsole() {
         return con;
+    }
+
+    public Upload getUpload() {
+        return upload;
     }
 
 }

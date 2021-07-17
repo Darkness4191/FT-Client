@@ -10,6 +10,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Parser implements PropertyChangeListener {
 
@@ -17,6 +18,7 @@ public class Parser implements PropertyChangeListener {
     private FTPFrame frame;
 
     private String currentDir;
+    private ArrayList<String> downloaded = new ArrayList<>();
 
     public Parser(Connector connector, FTPFrame frame) {
         this.connector = connector;
@@ -32,6 +34,7 @@ public class Parser implements PropertyChangeListener {
     private File parseFile(String filename, boolean isDirectory) throws IOException {
 
         File poss = new File(currentDir.contains(filename) ? currentDir : currentDir + File.separator + filename);
+
         if(poss.exists()) {
             DebugPrinter.println(String.format("Returning temp " + (isDirectory ? "folder" : "file") + " at %s", currentDir.contains(filename) ? currentDir : currentDir + File.separator + filename));
             return poss;
@@ -99,13 +102,32 @@ public class Parser implements PropertyChangeListener {
         return false;
     }
 
-    public void refreshView() throws IOException {
-        for (FTPFile c : connector.getClient().listFiles()) {
-            parseFile(c);
+    private boolean conainsName(FTPFile[] files, String name) {
+        for(FTPFile c : files) {
+            if(c.getName().equals(name)) {
+                return true;
+            }
         }
+        return false;
+    }
 
-        frame.getFtpChooser().setCurrentDirectory(new File(currentDir));
-        frame.getFtpChooser().rescanCurrentDirectory();
+    public void refreshView() throws IOException {
+        if(currentDir.contains(frame.PATH_TO_TEMP)) {
+            File current = new File(currentDir);
+
+            for(File c : current.listFiles()) {
+                if(!conainsName(connector.getClient().listFiles(), c.getName())) {
+                    ut.deleteFileRec(c);
+                }
+            }
+
+            for (FTPFile c : connector.getClient().listFiles()) {
+                parseFile(c);
+            }
+
+            frame.getFtpChooser().setCurrentDirectory(new File(currentDir));
+            frame.getFtpChooser().rescanCurrentDirectory();
+        }
     }
 
     public Connector getConnector() {

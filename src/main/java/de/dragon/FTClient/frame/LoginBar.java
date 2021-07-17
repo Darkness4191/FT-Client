@@ -2,10 +2,7 @@ package de.dragon.FTClient.frame;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import de.dragon.UsefulThings.console.Console;
-import de.dragon.UsefulThings.misc.DebugPrinter;
 import de.dragon.UsefulThings.ut;
 
 import javax.swing.*;
@@ -14,10 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 
-public class Menubar extends JPanel implements ActionListener {
+public class LoginBar extends JPanel implements ActionListener {
 
     private JPasswordField passwordField;
     private JTextField textField;
@@ -25,7 +20,7 @@ public class Menubar extends JPanel implements ActionListener {
 
     private FTPFrame parent;
 
-    public Menubar(FTPFrame parent) throws IOException {
+    public LoginBar(FTPFrame parent) throws IOException {
         this.parent = parent;
 
         GridLayout layout = new GridLayout();

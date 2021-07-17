@@ -10,7 +10,6 @@ public class ConfigJFileChooser {
     public ConfigJFileChooser(JFileChooser chooser) {
         this.chooser = chooser;
         chooser.setMultiSelectionEnabled(true);
-        disableButtons(chooser);
     }
 
     private void disableButtons(Container con) {
@@ -18,10 +17,6 @@ public class ConfigJFileChooser {
 
             if (c instanceof JButton) {
                 JButton b = (JButton) c;
-                Icon icon = b.getIcon();
-                if (icon != null && icon == UIManager.getIcon("FileChooser.newFolderIcon")) {
-                    b.setEnabled(false);
-                }
 
                 if (b.getText() != null && b.getText().equals("Open")) {
                     b.setText("Download");
