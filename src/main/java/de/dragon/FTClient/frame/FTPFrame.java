@@ -117,6 +117,12 @@ public class FTPFrame {
 
     public void uninit() {
         if(isInit) {
+            try {
+                connector.getClient().logout();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             isInit = false;
             connector = null;
             parser = null;
@@ -140,7 +146,7 @@ public class FTPFrame {
 
     private void buildFrame(JComponent c) {
         if(frame == null) {
-            frame = new JFrame("FTClient");
+            frame = new JFrame("SimpleFTP Client");
             frame.setSize(800, 450);
             frame.setLocationRelativeTo(null);
             frame.setBackground(Console.DefaultBackground);

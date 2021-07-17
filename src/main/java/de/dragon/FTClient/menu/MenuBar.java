@@ -12,6 +12,7 @@ public class MenuBar extends JMenuBar {
         JMenu file = new JMenu("File");
         file.add(new UploadFileMenu(frame));
         file.add(new DeleteMenu(frame));
+        file.add(new LogoutMenu(frame));
 
         JMenu view = new JMenu("View");
         view.add(new EnableHiddenFiles(frame));
