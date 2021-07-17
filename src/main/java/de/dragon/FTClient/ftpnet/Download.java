@@ -2,11 +2,7 @@ package de.dragon.FTClient.ftpnet;
 
 import de.dragon.FTClient.frame.ApproveDownload;
 import de.dragon.FTClient.frame.FTPFrame;
-import de.dragon.FTClient.info.ProgressView;
-import de.dragon.UsefulThings.events.ProgressChangeEvent;
-import de.dragon.UsefulThings.events.listeners.ProgressListener;
 import de.dragon.UsefulThings.misc.DebugPrinter;
-import de.dragon.UsefulThings.net.Pipe;
 import org.apache.commons.net.ftp.FTPFile;
 
 import javax.swing.*;

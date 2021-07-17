@@ -38,38 +38,59 @@ public class FTPFrame {
     private DropListener dropTarget;
 
     private JFrame frame;
+    private Console con;
 
-    public FTPFrame(String host, String user, String pass) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+    private JComponent lastPainted;
+
+    public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         DebugPrinter.setPrint(true);
 
+        con = new Console(false);
+        con.setEditable(false);
+
+        //menubar
+        menu = new Menubar(this);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
+        splitPane.setDividerLocation(24);
+        splitPane.setDividerSize(0);
+        splitPane.setBackground(Console.DefaultBackground);
+
+        buildFrame(splitPane);
+    }
+
+    public void initFileChooser(LoginContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         //init temp direc
         if(ut.getTempFile("FTPClient", token).exists()) {
             ut.deleteFileRec(ut.getTempFile("FTPClient", token));
         }
 
-        token = host + "#" + user;
+        token = c.getHost() + "#" + c.getUser();
         PATH_TO_TEMP = ut.createTempFile("FTPClient", token, true).getAbsolutePath();
         RELATIVE_PATH_TO_TEMP = "FTPClient" + File.separator + token;
 
         //needs updated ftp file converted to file
         ftpChooser = new JFileChooser(PATH_TO_TEMP);
         ftpChooser.setOpaque(false);
-
-        //menubar
-        menu = new Menubar();
+        filelister = (JComponent) ftpChooser.getComponent(2);
 
         //config ftpchooser
         new ConfigJFileChooser(ftpChooser);
 
         //login
-        connector = new Connector(host, user, pass);
+        printToConsole("Connecting...", Color.WHITE);
+        try {
+            connector = new Connector(c.getHost(), c.getUser(), c.getPass());
+            printToConsole("Connected", Color.WHITE);
+        } catch(IOException e) {
+            printToConsole("Error: Connection failed:", Color.RED);
+            printToConsole(connector.getClient().getStatus(), Color.WHITE);
+        }
         parser = new Parser(connector, this);
         download = new Download(parser);
 
         //droplistener
         upload = new Upload(parser);
-        filelister = (JComponent) ftpChooser.getComponent(2);
         dropTarget = new DropListener(upload);
         ftpChooser.addPropertyChangeListener(parser);
         ftpChooser.addActionListener(download);
@@ -77,17 +98,30 @@ public class FTPFrame {
         DebugPrinter.println(filelister.getClass().getName());
 
         //update fileview
+        printToConsole("Refreshing...", Color.WHITE);
         parser.refreshView();
 
         //JFrame setup
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, filelister);
-        splitPane.setDividerLocation(0.50);
+        splitPane.setDividerLocation(24);
         splitPane.setDividerSize(0);
-        frame = new JFrame("FTClient");
-        frame.setSize(800, 450);
-        frame.setLocationRelativeTo(null);
-        frame.setBackground(Console.DefaultBackground);
-        frame.add(splitPane, BorderLayout.CENTER);
+
+        buildFrame(splitPane);
+    }
+
+    private void buildFrame(JComponent c) {
+        if(frame == null) {
+            frame = new JFrame("FTClient");
+            frame.setSize(800, 450);
+            frame.setLocationRelativeTo(null);
+            frame.setBackground(Console.DefaultBackground);
+        } else {
+            frame.remove(lastPainted);
+        }
+
+        frame.add(c, BorderLayout.CENTER);
+
+        lastPainted = c;
 
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
@@ -103,10 +137,18 @@ public class FTPFrame {
 
     public void collectTrashandExit() {
         DeleteOnExitReqCall.collectTrash();
-        new File(PATH_TO_TEMP).delete();
-        connector.logout();
+        if(PATH_TO_TEMP != null) {
+            new File(PATH_TO_TEMP).delete();
+            connector.logout();
+        }
 
         System.exit(0);
+    }
+
+    public void printToConsole(String s, Color c) {
+        if(connector == null) {
+            con.printColoredTextln(s, c);
+        }
     }
 
     public JFileChooser getFtpChooser() {
@@ -115,6 +157,10 @@ public class FTPFrame {
 
     public void addActionListener(ActionListener listener) {
         ftpChooser.addActionListener(listener);
+    }
+
+    public Console getConsole() {
+        return con;
     }
 
 }

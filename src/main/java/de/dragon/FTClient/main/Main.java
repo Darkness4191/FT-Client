@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         EventQueue.invokeLater(() -> {
             try {
-                new FTPFrame("162.55.55.115", "user1", "75369874125");
+                new FTPFrame();
             } catch (IOException | UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }

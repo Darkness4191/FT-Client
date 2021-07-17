@@ -1,31 +1,60 @@
 package de.dragon.FTClient.frame;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import de.dragon.UsefulThings.console.Console;
 import de.dragon.UsefulThings.misc.DebugPrinter;
+import de.dragon.UsefulThings.ut;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class Menubar extends JPanel implements ActionListener {
 
-    private ArrayBlockingQueue<LoginContainer> q = new ArrayBlockingQueue<>(1);
+    private JPasswordField passwordField;
+    private JTextField textField;
+    private JTextField hostField;
 
-    public Menubar() {
+    private FTPFrame parent;
+
+    public Menubar(FTPFrame parent) throws IOException {
+        this.parent = parent;
+
         GridLayout layout = new GridLayout();
-        layout.setVgap(2);
-        layout.setHgap(2);
         layout.setColumns(4);
         layout.setRows(1);
         setLayout(layout);
 
-        JPasswordField passwordField = new JPasswordField();
-        JTextField textField = new JTextField();
-        JTextField hostField = new JTextField();
+        passwordField = new JPasswordField();
+        textField = new JTextField();
+        hostField = new JTextField();
 
         JButton loginButton = new JButton("Login");
         loginButton.addActionListener(this);
+        loginButton.setFocusPainted(false);
+
+        if(ut.getTempFile("FTPClient", "login_details.save").exists()) {
+            JsonElement json = new JsonParser().parse(new FileReader(ut.getTempFile("FTPClient", "login_details.save")));
+
+            //Get the content of the first map
+            String host = json.getAsJsonObject().get("host").getAsString();
+            String user = json.getAsJsonObject().get("user").getAsString();
+
+            hostField.setText(host);
+            textField.setText(user);
+        }
+
+        hostField.setBorder(new GenericBorder());
+        textField.setBorder(new GenericBorder());
+        passwordField.setBorder(new GenericBorder());
 
         add(hostField);
         add(textField);
@@ -33,12 +62,26 @@ public class Menubar extends JPanel implements ActionListener {
         add(loginButton);
     }
 
-    public LoginContainer getContainer() throws InterruptedException {
-        return q.take();
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println(e.getActionCommand());
+        String s = new String(passwordField.getPassword());
+        passwordField.setText("");
+
+        if(!textField.getText().equals("") && !hostField.getText().equals("") && !s.equals("")) {
+            try {
+                parent.printToConsole("Initializing...", Color.WHITE);
+                LoginContainer container = new LoginContainer(hostField.getText(), textField.getText(), s);
+                parent.initFileChooser(container);
+                container.setPass("");
+
+                Gson gson = new Gson();
+                String jsons = gson.toJson(container);
+                ut.saveInfoToAppdata("FTPClient", "login_details", jsons);
+            } catch (UnsupportedLookAndFeelException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException unsupportedLookAndFeelException) {
+                unsupportedLookAndFeelException.printStackTrace();
+            }
+        } else {
+            parent.printToConsole("Error: Please specify host, username and password for the ftp Server", Color.RED);
+        }
     }
 }
