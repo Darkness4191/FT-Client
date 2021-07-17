@@ -83,7 +83,7 @@ public class Parser implements PropertyChangeListener {
                     }
 
                 } catch (IOException e) {
-                    frame.uninit();
+                    frame.criticalError(e);
                     e.printStackTrace();
                 }
             }

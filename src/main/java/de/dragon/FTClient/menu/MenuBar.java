@@ -9,11 +9,15 @@ public class MenuBar extends JMenuBar {
     public MenuBar(FTPFrame frame) {
         super();
 
-        JMenu menu = new JMenu("File");
-        menu.add(new UploadFileMenu(frame));
-        menu.add(new DeleteMenu(frame));
+        JMenu file = new JMenu("File");
+        file.add(new UploadFileMenu(frame));
+        file.add(new DeleteMenu(frame));
 
-        this.add(menu);
+        JMenu view = new JMenu("View");
+        view.add(new EnableHiddenFiles(frame));
+
+        this.add(file);
+        this.add(view);
     }
 
 }

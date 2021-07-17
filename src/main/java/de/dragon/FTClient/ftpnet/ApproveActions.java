@@ -58,7 +58,7 @@ public class ApproveActions implements ActionListener {
                             failed++;
                         }
                     } catch (IOException ioException) {
-                        frame.uninit();
+                        frame.criticalError(ioException);
                         ioException.printStackTrace();
                     }
                 }
@@ -77,7 +77,7 @@ public class ApproveActions implements ActionListener {
                         try {
                             parser.getConnector().getClient().deleteFile(parser.getConnector().getClient().printWorkingDirectory() + "/" + selectedFiles[i].getName());
                         } catch (IOException ioException) {
-                            frame.uninit();
+                            frame.criticalError(ioException);
                             ioException.printStackTrace();
                         }
                     }
@@ -89,7 +89,7 @@ public class ApproveActions implements ActionListener {
                     try {
                         frame.refreshView();
                     } catch (IOException ioException) {
-                        frame.uninit();
+                        frame.criticalError(ioException);
                         ioException.printStackTrace();
                     }
 

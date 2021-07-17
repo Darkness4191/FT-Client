@@ -21,7 +21,7 @@ public class UploadFileMenu extends JMenuItem implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(frame.getUpload() != null) {
+        if(frame.isInit()) {
             JFileChooser chooser = new JFileChooser();
             chooser.setMultiSelectionEnabled(true);
             chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -32,8 +32,9 @@ public class UploadFileMenu extends JMenuItem implements ActionListener {
                 for(File f : chooser.getSelectedFiles()) {
                     frame.getUpload().addToQueue(f);
                 }
+                JOptionPane.showMessageDialog(null, String.format("Upload of %d files successful", chooser.getSelectedFiles().length), "Info", JOptionPane.INFORMATION_MESSAGE);
+
             }
-            JOptionPane.showMessageDialog(null, String.format("Upload of %d files successful", chooser.getSelectedFiles().length), "Info", JOptionPane.INFORMATION_MESSAGE);
 
         } else {
             frame.printToConsole("Error: Upload not possible", Color.RED);

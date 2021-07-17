@@ -41,6 +41,7 @@ public class FTPFrame {
 
     private JComponent lastPainted;
     private Task task;
+    private boolean isInit = false;
 
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -84,7 +85,7 @@ public class FTPFrame {
             printToConsole("Connected", Color.WHITE);
         } catch(IOException e) {
             printToConsole("Error: Connection failed:", Color.RED);
-            if(connector != null) {
+            if(isInit) {
                 printToConsole(connector.getClient().getStatus(), Color.WHITE);
             }
         }
@@ -110,27 +111,31 @@ public class FTPFrame {
         splitPane.setDividerLocation(23);
         splitPane.setDividerSize(0);
 
+        isInit = true;
         buildFrame(splitPane);
     }
 
     public void uninit() {
-        connector = null;
-        parser = null;
-        upload = null;
-        approveActions = null;
-        ftpChooser = null;
-        filelister = null;
-        PATH_TO_TEMP = null;
-        RELATIVE_PATH_TO_TEMP = null;
-        token = null;
-        con.flushConsole();
+        if(isInit) {
+            isInit = false;
+            connector = null;
+            parser = null;
+            upload = null;
+            approveActions = null;
+            ftpChooser = null;
+            filelister = null;
+            PATH_TO_TEMP = null;
+            RELATIVE_PATH_TO_TEMP = null;
+            token = null;
+            con.flushConsole();
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
-        splitPane.setDividerLocation(23);
-        splitPane.setDividerSize(0);
-        splitPane.setBackground(Console.DefaultBackground);
+            JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
+            splitPane.setDividerLocation(23);
+            splitPane.setDividerSize(0);
+            splitPane.setBackground(Console.DefaultBackground);
 
-        buildFrame(splitPane);
+            buildFrame(splitPane);
+        }
     }
 
     private void buildFrame(JComponent c) {
@@ -164,7 +169,7 @@ public class FTPFrame {
 
     public void collectTrashandExit() {
         DeleteOnExitReqCall.collectTrash();
-        if(PATH_TO_TEMP != null) {
+        if(isInit) {
             new File(PATH_TO_TEMP).delete();
             connector.logout();
         }
@@ -173,7 +178,7 @@ public class FTPFrame {
     }
 
     public void printToConsole(String s, Color c) {
-        if(connector == null) {
+        if(isInit) {
             con.printColoredTextln(s, c);
         }
     }
@@ -191,6 +196,11 @@ public class FTPFrame {
         this.task = task;
     }
 
+    public void criticalError(Exception e) {
+        uninit();
+        JOptionPane.showMessageDialog(null, "Server connection timeout: Reinitializing components", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
     public FTPSClient getClient() {
         return connector.getClient();
     }
@@ -199,8 +209,12 @@ public class FTPFrame {
         return ftpChooser;
     }
 
+    public boolean isInit() {
+        return isInit;
+    }
+
     public void refreshView() throws IOException {
-        if(parser != null) {
+        if(isInit) {
             parser.refreshView();
         }
     }
