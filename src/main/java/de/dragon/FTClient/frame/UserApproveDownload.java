@@ -2,7 +2,7 @@ package de.dragon.FTClient.frame;
 
 import javax.swing.*;
 
-public class ApproveDownload {
+public class UserApproveDownload {
 
     public static int ask() {
         Object[] options = {"Yes", "Yes, don't ask me again", "No"};

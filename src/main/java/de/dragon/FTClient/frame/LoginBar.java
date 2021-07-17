@@ -65,7 +65,7 @@ public class LoginBar extends JPanel implements ActionListener {
         if(!textField.getText().equals("") && !hostField.getText().equals("") && !s.equals("")) {
             try {
                 parent.printToConsole("Initializing...", Color.WHITE);
-                LoginContainer container = new LoginContainer(hostField.getText(), textField.getText(), s);
+                LoginDetailsContainer container = new LoginDetailsContainer(hostField.getText(), textField.getText(), s);
                 parent.initFileChooser(container);
                 container.setPass("");
 

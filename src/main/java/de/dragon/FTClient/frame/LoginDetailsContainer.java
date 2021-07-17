@@ -1,12 +1,12 @@
 package de.dragon.FTClient.frame;
 
-public class LoginContainer {
+public class LoginDetailsContainer {
 
     private String host;
     private String user;
     private String pass;
 
-    public LoginContainer(String host, String user, String pass) {
+    public LoginDetailsContainer(String host, String user, String pass) {
         this.host = host;
         this.user = user;
         this.pass = pass;

@@ -44,7 +44,6 @@ public class FTPFrame {
 
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        DebugPrinter.setPrint(true);
 
         con = new Console(false);
         con.setEditable(false);
@@ -52,14 +51,14 @@ public class FTPFrame {
         //menubar
         menu = new LoginBar(this);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
-        splitPane.setDividerLocation(24);
+        splitPane.setDividerLocation(23);
         splitPane.setDividerSize(0);
         splitPane.setBackground(Console.DefaultBackground);
 
         buildFrame(splitPane);
     }
 
-    public void initFileChooser(LoginContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void initFileChooser(LoginDetailsContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         //init temp direc
         if(ut.getTempFile("FTPClient", token).exists()) {
             ut.deleteFileRec(ut.getTempFile("FTPClient", token));
@@ -106,7 +105,7 @@ public class FTPFrame {
 
         //JFrame setup
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, filelister);
-        splitPane.setDividerLocation(24);
+        splitPane.setDividerLocation(23);
         splitPane.setDividerSize(0);
 
         buildFrame(splitPane);

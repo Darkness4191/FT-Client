@@ -65,11 +65,11 @@ public class Parser implements PropertyChangeListener {
         if (evt.getPropertyName().equals(JFileChooser.DIRECTORY_CHANGED_PROPERTY)) {
             File f = (File) evt.getNewValue();
 
-            if (f.getAbsolutePath().equals(new File(frame.PATH_TO_TEMP).getParentFile().getAbsolutePath()) || !f.getAbsolutePath().contains(frame.token)) {
+            if (f.getAbsolutePath().equals(new File(frame.PATH_TO_TEMP).getParentFile().getAbsolutePath()) || !f.getAbsolutePath().contains(frame.PATH_TO_TEMP)) {
                 File abs = new File(frame.PATH_TO_TEMP);
                 frame.getFtpChooser().setCurrentDirectory(abs);
                 currentDir = abs.getAbsolutePath();
-            } else {
+            } else if (f.getAbsolutePath().contains(frame.PATH_TO_TEMP)) {
                 try {
                     String s = connector.getClient().printWorkingDirectory();
 
@@ -115,13 +115,15 @@ public class Parser implements PropertyChangeListener {
         if(currentDir.contains(frame.PATH_TO_TEMP)) {
             File current = new File(currentDir);
 
+            FTPFile[] list = connector.getClient().listFiles();
+
             for(File c : current.listFiles()) {
-                if(!conainsName(connector.getClient().listFiles(), c.getName())) {
+                if(!conainsName(list, c.getName()) && !c.getName().equals("^^^")) {
                     ut.deleteFileRec(c);
                 }
             }
 
-            for (FTPFile c : connector.getClient().listFiles()) {
+            for (FTPFile c : list) {
                 parseFile(c);
             }
 

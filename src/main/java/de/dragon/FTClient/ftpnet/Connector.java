@@ -1,6 +1,8 @@
 package de.dragon.FTClient.ftpnet;
 
-import org.apache.commons.net.ftp.*;
+import org.apache.commons.net.ftp.FTPConnectionClosedException;
+import org.apache.commons.net.ftp.FTPReply;
+import org.apache.commons.net.ftp.FTPSClient;
 
 import java.io.IOException;
 
@@ -17,6 +19,7 @@ public class Connector {
         client.execPROT("P");
         client.login(user, pass);
 
+        client.setControlKeepAliveTimeout(200);
         client.setKeepAlive(true);
 
         client.setListHiddenFiles(false);

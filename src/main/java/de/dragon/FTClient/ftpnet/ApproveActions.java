@@ -1,6 +1,6 @@
 package de.dragon.FTClient.ftpnet;
 
-import de.dragon.FTClient.frame.ApproveDownload;
+import de.dragon.FTClient.frame.UserApproveDownload;
 import de.dragon.FTClient.frame.FTPFrame;
 import de.dragon.FTClient.frame.Task;
 import de.dragon.UsefulThings.misc.DebugPrinter;
@@ -92,6 +92,8 @@ public class ApproveActions implements ActionListener {
                 }
             }
 
+            frame.getFtpChooser().setSelectedFile(new File(""));
+
         } else if(e.getActionCommand().equals(JFileChooser.CANCEL_SELECTION)) {
             frame.collectTrashandExit();
         }
@@ -99,7 +101,7 @@ public class ApproveActions implements ActionListener {
 
     public boolean download(FTPFile file, String downloadFolder) throws IOException {
         if(!always_approve) {
-            int a = ApproveDownload.ask();
+            int a = UserApproveDownload.ask();
 
             if(a == JOptionPane.NO_OPTION){
                 always_approve = true;
