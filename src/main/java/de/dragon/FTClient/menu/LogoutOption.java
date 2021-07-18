@@ -2,16 +2,14 @@ package de.dragon.FTClient.menu;
 
 import de.dragon.FTClient.frame.FTPFrame;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class LogoutMenu extends JMenuItem implements ActionListener {
+public class LogoutOption extends FMenuItem {
 
     private FTPFrame frame;
     private boolean state = false;
 
-    public LogoutMenu(FTPFrame frame) {
+    public LogoutOption(FTPFrame frame) {
         super();
         this.frame = frame;
         this.setText("Logout");

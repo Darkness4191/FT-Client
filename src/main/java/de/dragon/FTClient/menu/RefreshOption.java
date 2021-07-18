@@ -2,20 +2,17 @@ package de.dragon.FTClient.menu;
 
 import de.dragon.FTClient.frame.FTPFrame;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 
-public class EnableHiddenFiles extends JCheckBoxMenuItem implements ActionListener {
+public class RefreshOption extends FMenuItem {
 
     private FTPFrame frame;
-    private boolean state = false;
 
-    public EnableHiddenFiles(FTPFrame frame) {
+    public RefreshOption(FTPFrame frame) {
         super();
         this.frame = frame;
-        this.setText("Hidden files");
+        this.setText("Refresh");
         this.addActionListener(this);
     }
 
@@ -23,11 +20,8 @@ public class EnableHiddenFiles extends JCheckBoxMenuItem implements ActionListen
     public void actionPerformed(ActionEvent e) {
         if(frame.isInit()) {
             try {
-                state = !state;
-                frame.getClient().setListHiddenFiles(state);
                 frame.refreshView();
             } catch (IOException ioException) {
-                state = false;
                 frame.criticalError(ioException);
                 ioException.printStackTrace();
             }

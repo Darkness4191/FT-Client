@@ -7,11 +7,11 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class DeleteMenu extends JMenuItem implements ActionListener {
+public class DeleteOption extends JMenuItem implements ActionListener {
 
     private FTPFrame frame;
 
-    public DeleteMenu(FTPFrame frame) {
+    public DeleteOption(FTPFrame frame) {
         super();
         this.frame = frame;
         this.setText("Delete");

@@ -66,7 +66,6 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
 
             listenerHostField.changeToNormal();
             listenerTextField.changeToNormal();
-            listenerPassField.changeToNormal();
 
             //Get the content of the first map
             String host = json.getAsJsonObject().get("host").getAsString();

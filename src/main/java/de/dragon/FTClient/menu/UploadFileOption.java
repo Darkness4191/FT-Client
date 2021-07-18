@@ -8,11 +8,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-public class UploadFileMenu extends JMenuItem implements ActionListener {
+public class UploadFileOption extends JMenuItem implements ActionListener {
 
     private FTPFrame frame;
 
-    public UploadFileMenu(FTPFrame frame) {
+    public UploadFileOption(FTPFrame frame) {
         super();
         this.frame = frame;
         this.setText("Upload");

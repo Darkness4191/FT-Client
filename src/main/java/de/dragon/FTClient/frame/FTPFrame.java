@@ -104,7 +104,7 @@ public class FTPFrame {
         DebugPrinter.println(filelister.getClass().getName());
 
         //update fileview
-        con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), "Services fully established\n", null);
+        con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), "Connection fully established\n", null);
         parser.refreshView();
 
         //JFrame setup
@@ -175,13 +175,18 @@ public class FTPFrame {
     }
 
     public void collectTrashandExit() {
-        DeleteOnExitReqCall.collectTrash();
-        if (isInit) {
-            new File(PATH_TO_TEMP).delete();
-            connector.logout();
-        }
+        try {
+            DeleteOnExitReqCall.collectTrash();
+            if (isInit) {
+                new File(PATH_TO_TEMP).delete();
+                connector.logout();
+            }
 
-        System.exit(0);
+            System.exit(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     public void printToConsole(String s, Color c) {
