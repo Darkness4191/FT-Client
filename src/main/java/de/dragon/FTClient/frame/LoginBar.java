@@ -3,6 +3,8 @@ package de.dragon.FTClient.frame;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import de.dragon.FTClient.misc.PasswordFieldKeyListener;
+import de.dragon.FTClient.misc.TextFieldKeyListener;
 import de.dragon.UsefulThings.ut;
 
 import javax.swing.*;
@@ -39,12 +41,32 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         textField = new JTextField();
         hostField = new JTextField();
 
+        textField.setFont(textField.getFont().deriveFont(11f));
+        hostField.setFont(hostField.getFont().deriveFont(11f));
+        passwordField.setFont(passwordField.getFont().deriveFont(11f));
+
+        //adding listeners
+        TextFieldKeyListener listenerTextField = new TextFieldKeyListener(textField, "username");
+        TextFieldKeyListener listenerHostField = new TextFieldKeyListener(hostField, "host IP");
+        PasswordFieldKeyListener listenerPassField= new PasswordFieldKeyListener(passwordField, "password");
+
+        textField.addKeyListener(listenerTextField);
+        textField.addFocusListener(listenerTextField);
+        hostField.addKeyListener(listenerHostField);
+        hostField.addFocusListener(listenerHostField);
+        passwordField.addKeyListener(listenerPassField);
+        passwordField.addFocusListener(listenerPassField);
+
         JButton loginButton = new JButton("Login");
         loginButton.addActionListener(this);
         loginButton.setFocusPainted(false);
 
         if(ut.getTempFile("FTPClient", "login_details.save").exists()) {
             JsonElement json = new JsonParser().parse(new FileReader(ut.getTempFile("FTPClient", "login_details.save")));
+
+            listenerHostField.changeToNormal();
+            listenerTextField.changeToNormal();
+            listenerPassField.changeToNormal();
 
             //Get the content of the first map
             String host = json.getAsJsonObject().get("host").getAsString();
