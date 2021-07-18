@@ -98,7 +98,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
                 interruptedException.printStackTrace();
             }
         } else {
-            parent.printToConsole("Error: Please specify host, username and password for the ftp Server", Color.RED);
+            parent.getConsole().printColoredTextln("Error: Please specify host, username and password for the ftp Server", Color.RED);
         }
     }
 
@@ -108,7 +108,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
             try {
                 String s = q.take();
 
-                parent.getConsole().getPane().getDocument().insertString(parent.getConsole().getPane().getDocument().getLength(), "Initializing...\n", null);
+                parent.getConsole().getPane().getDocument().insertString(parent.getConsole().getPane().getDocument().getLength(), "Login information prepared", null);
                 LoginDetailsContainer container = new LoginDetailsContainer(hostField.getText(), textField.getText(), s);
                 parent.initFileChooser(container);
                 container.setPass("");

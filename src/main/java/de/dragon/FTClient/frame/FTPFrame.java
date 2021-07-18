@@ -9,6 +9,7 @@ import de.dragon.FTClient.misc.DropListener;
 import de.dragon.UsefulThings.console.Console;
 import de.dragon.UsefulThings.dir.DeleteOnExitReqCall;
 import de.dragon.UsefulThings.misc.DebugPrinter;
+import de.dragon.UsefulThings.net.Token;
 import de.dragon.UsefulThings.ut;
 import org.apache.commons.net.ftp.FTPSClient;
 
@@ -24,7 +25,6 @@ import java.io.IOException;
 public class FTPFrame {
 
     public String PATH_TO_TEMP;
-    public String RELATIVE_PATH_TO_TEMP;
     public String token;
 
     private final String TITLE = "File Transfer Client";
@@ -48,6 +48,7 @@ public class FTPFrame {
 
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        UIManager.put("FileChooser.readOnly", Boolean.TRUE);
 
         con = new Console(false);
         con.setEditable(false);
@@ -63,88 +64,75 @@ public class FTPFrame {
     }
 
     public void initFileChooser(LoginDetailsContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, BadLocationException {
-        //init temp direc
-        if (ut.getTempFile("FTPClient", token).exists()) {
-            ut.deleteFileRec(ut.getTempFile("FTPClient", token));
-        }
-
-        token = c.getHost() + "#" + c.getUser();
-        PATH_TO_TEMP = ut.createTempFile("FTPClient", token, true).getAbsolutePath();
-        RELATIVE_PATH_TO_TEMP = "FTPClient" + File.separator + token;
-
-        //needs updated ftp file converted to file
-        ftpChooser = new JFileChooser(PATH_TO_TEMP);
-        ftpChooser.setOpaque(false);
-        filelister = (JComponent) ftpChooser.getComponent(2);
-
-        //config ftpchooser
-        new ConfigJFileChooser(ftpChooser);
-
-        //login
-        con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), "Connecting...\n", null);
-
         try {
-            connector = new Connector(c.getHost(), c.getUser(), c.getPass());
-            con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), "Connected\n", null);
-        } catch (IOException e) {
-            printToConsole("Error: Connection failed:", Color.RED);
-            if (isInit) {
-                printToConsole(connector.getClient().getStatus(), Color.WHITE);
+            //init temp direc
+            printToConsoleln("Initializing components...");
+            if (ut.getTempFile("FTPClient", token).exists()) {
+                ut.deleteFileRec(ut.getTempFile("FTPClient", token));
             }
-        }
 
-        parser = new Parser(connector, this);
-        approveActions = new ApproveActions(parser);
-        upload = new Upload(parser);
+            token = c.getHost() + "#" + c.getUser();
+            String realToken = new Token(20).encode();
 
-        //droplistener
-        dropTarget = new DropListener(upload);
-        ftpChooser.addPropertyChangeListener(parser);
-        ftpChooser.addActionListener(approveActions);
-        filelister.setDropTarget(dropTarget);
-        DebugPrinter.println(filelister.getClass().getName());
+            if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+                PATH_TO_TEMP = ut.createAbsolutTempFile(ut.merge(new String[]{System.getProperty("user.home"), "AppData", "Local", "Temp", realToken, token}, File.separator), true).getAbsolutePath();
+            } else {
+                PATH_TO_TEMP = ut.createAbsolutTempFile(ut.merge(new String[]{System.getProperty("user.home"), "Temp", realToken, token}, File.separator), true).getAbsolutePath();
+            }
 
-        //update fileview
-        con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), "Connection fully established\n", null);
-        parser.refreshView();
+            //TODO optimize parent file deletion
+            DeleteOnExitReqCall.add(new File(PATH_TO_TEMP).getParentFile());
 
-        //JFrame setup
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, filelister);
-        splitPane.setDividerLocation(23);
-        splitPane.setDividerSize(0);
+            DebugPrinter.println(ut.merge(new String[]{System.getProperty("user.home"), "Temp", realToken, token}, File.separator));
 
-        isInit = true;
+            //needs updated ftp file converted to file
+            ftpChooser = new JFileChooser(PATH_TO_TEMP);
+            ftpChooser.setOpaque(false);
+            filelister = (JComponent) ftpChooser.getComponent(2);
 
-        buildFrame(splitPane);
-        setTask(Task.download);
-    }
+            //config ftpchooser
+            new ConfigJFileChooser(ftpChooser);
 
-    public void uninit() {
-        if (isInit) {
+            //login
+            printToConsoleln("Connecting to FTP server...");
+
             try {
-                connector.getClient().logout();
+                connector = new Connector(c.getHost(), c.getUser(), c.getPass());
+                printToConsoleln("Connection attempt successful");
             } catch (IOException e) {
-                e.printStackTrace();
+                criticalError(e);
+                return;
             }
 
-            isInit = false;
-            connector = null;
-            parser = null;
-            upload = null;
-            approveActions = null;
-            ftpChooser = null;
-            filelister = null;
-            PATH_TO_TEMP = null;
-            RELATIVE_PATH_TO_TEMP = null;
-            token = null;
-            con.flushConsole();
+            printToConsoleln("Building parser");
+            parser = new Parser(connector, this);
+            approveActions = new ApproveActions(parser);
+            upload = new Upload(parser);
 
-            JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
+            //droplistener
+            dropTarget = new DropListener(upload);
+            ftpChooser.addPropertyChangeListener(parser);
+            ftpChooser.addActionListener(approveActions);
+            filelister.setDropTarget(dropTarget);
+            DebugPrinter.println(filelister.getClass().getName());
+
+            //update fileview
+            printToConsoleln("Connection fully established");
+            printToConsoleln("Refreshing...");
+            parser.refreshView();
+
+            //JFrame setup
+            JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, filelister);
             splitPane.setDividerLocation(23);
             splitPane.setDividerSize(0);
-            splitPane.setBackground(Console.DefaultBackground);
+
+            isInit = true;
 
             buildFrame(splitPane);
+            setTask(Task.download);
+        } catch (Exception e) {
+            criticalError(e);
+            e.printStackTrace();
         }
     }
 
@@ -154,24 +142,23 @@ public class FTPFrame {
             frame.setSize(800, 450);
             frame.setLocationRelativeTo(null);
             frame.setBackground(Console.DefaultBackground);
+
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            frame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    collectTrashandExit();
+                }
+            });
+
+            //add Menubar
+            frame.setJMenuBar(new MenuBar(this));
         } else {
             frame.remove(lastPainted);
         }
 
         frame.add(c, BorderLayout.CENTER);
-
         lastPainted = c;
-
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                collectTrashandExit();
-            }
-        });
-
-        //add Menubar
-        frame.setJMenuBar(new MenuBar(this));
 
         frame.setVisible(true);
         frame.revalidate();
@@ -192,10 +179,39 @@ public class FTPFrame {
         }
     }
 
-    public void printToConsole(String s, Color c) {
-        if (isInit) {
-            con.printColoredTextln(s, c);
+    public void uninit() {
+        if(connector != null) {
+            try {
+                connector.getClient().disconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+        isInit = false;
+        connector = null;
+        parser = null;
+        upload = null;
+        approveActions = null;
+        ftpChooser = null;
+        filelister = null;
+        PATH_TO_TEMP = null;
+        token = null;
+
+        con.flushConsole();
+
+        System.gc();
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
+        splitPane.setDividerLocation(23);
+        splitPane.setDividerSize(0);
+        splitPane.setBackground(Console.DefaultBackground);
+
+        buildFrame(splitPane);
+    }
+
+    public void printToConsoleln(String s) throws BadLocationException {
+        con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), s + "\n", null);
     }
 
     public Task getTask() {
@@ -218,8 +234,8 @@ public class FTPFrame {
     }
 
     public void criticalError(Exception e) {
+        JOptionPane.showMessageDialog(null, "Critical Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         uninit();
-        JOptionPane.showMessageDialog(null, "Server connection timeout: Reinitializing components", "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public FTPSClient getClient() {

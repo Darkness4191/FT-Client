@@ -3,7 +3,6 @@ package de.dragon.FTClient.menu;
 import de.dragon.FTClient.frame.FTPFrame;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -35,8 +34,6 @@ public class UploadFileOption extends FMenuItem {
 
             }
 
-        } else {
-            frame.printToConsole("Error: Upload not possible", Color.RED);
         }
     }
 }
