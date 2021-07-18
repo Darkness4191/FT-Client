@@ -1,7 +1,7 @@
 package de.dragon.FTClient.frame;
 
-import de.dragon.FTClient.ftpnet.Connector;
 import de.dragon.FTClient.ftpnet.ApproveActions;
+import de.dragon.FTClient.ftpnet.Connector;
 import de.dragon.FTClient.ftpnet.Parser;
 import de.dragon.FTClient.ftpnet.Upload;
 import de.dragon.FTClient.menu.MenuBar;
@@ -13,6 +13,7 @@ import de.dragon.UsefulThings.ut;
 import org.apache.commons.net.ftp.FTPSClient;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -59,9 +60,9 @@ public class FTPFrame {
         buildFrame(splitPane);
     }
 
-    public void initFileChooser(LoginDetailsContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public void initFileChooser(LoginDetailsContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, BadLocationException {
         //init temp direc
-        if(ut.getTempFile("FTPClient", token).exists()) {
+        if (ut.getTempFile("FTPClient", token).exists()) {
             ut.deleteFileRec(ut.getTempFile("FTPClient", token));
         }
 
@@ -78,14 +79,14 @@ public class FTPFrame {
         new ConfigJFileChooser(ftpChooser);
 
         //login
-        printToConsole("Connecting...", Color.WHITE);
+        con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), "Connecting...\n", null);
 
         try {
             connector = new Connector(c.getHost(), c.getUser(), c.getPass());
-            printToConsole("Connected", Color.WHITE);
-        } catch(IOException e) {
+            con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), "Connected\n", null);
+        } catch (IOException e) {
             printToConsole("Error: Connection failed:", Color.RED);
-            if(isInit) {
+            if (isInit) {
                 printToConsole(connector.getClient().getStatus(), Color.WHITE);
             }
         }
@@ -103,7 +104,7 @@ public class FTPFrame {
         DebugPrinter.println(filelister.getClass().getName());
 
         //update fileview
-        printToConsole("Refreshing...", Color.WHITE);
+        con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), "Services fully established\n", null);
         parser.refreshView();
 
         //JFrame setup
@@ -116,7 +117,13 @@ public class FTPFrame {
     }
 
     public void uninit() {
-        if(isInit) {
+        if (isInit) {
+            try {
+                connector.getClient().logout();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             isInit = false;
             connector = null;
             parser = null;
@@ -139,8 +146,8 @@ public class FTPFrame {
     }
 
     private void buildFrame(JComponent c) {
-        if(frame == null) {
-            frame = new JFrame("FTClient");
+        if (frame == null) {
+            frame = new JFrame("SimpleFTP Client");
             frame.setSize(800, 450);
             frame.setLocationRelativeTo(null);
             frame.setBackground(Console.DefaultBackground);
@@ -169,7 +176,7 @@ public class FTPFrame {
 
     public void collectTrashandExit() {
         DeleteOnExitReqCall.collectTrash();
-        if(isInit) {
+        if (isInit) {
             new File(PATH_TO_TEMP).delete();
             connector.logout();
         }
@@ -178,7 +185,7 @@ public class FTPFrame {
     }
 
     public void printToConsole(String s, Color c) {
-        if(isInit) {
+        if (isInit) {
             con.printColoredTextln(s, c);
         }
     }
@@ -214,7 +221,7 @@ public class FTPFrame {
     }
 
     public void refreshView() throws IOException {
-        if(isInit) {
+        if (isInit) {
             parser.refreshView();
         }
     }
