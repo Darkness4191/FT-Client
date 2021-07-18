@@ -7,9 +7,10 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class DeleteOption extends JMenuItem implements ActionListener {
+public class DeleteOption extends JCheckBoxMenuItem implements ActionListener {
 
     private FTPFrame frame;
+    private boolean toggeled = false;
 
     public DeleteOption(FTPFrame frame) {
         super();
@@ -20,6 +21,12 @@ public class DeleteOption extends JMenuItem implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        frame.setTask(Task.delete);
+        if(!toggeled) {
+            toggeled = true;
+            frame.setTask(Task.delete);
+        } else {
+            toggeled = false;
+            frame.setTask(Task.download);
+        }
     }
 }

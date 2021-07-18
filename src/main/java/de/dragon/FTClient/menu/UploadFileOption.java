@@ -5,10 +5,9 @@ import de.dragon.FTClient.frame.FTPFrame;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
-public class UploadFileOption extends JMenuItem implements ActionListener {
+public class UploadFileOption extends FMenuItem {
 
     private FTPFrame frame;
 

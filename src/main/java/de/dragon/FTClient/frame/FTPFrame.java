@@ -27,6 +27,8 @@ public class FTPFrame {
     public String RELATIVE_PATH_TO_TEMP;
     public String token;
 
+    private final String TITLE = "File Transfer Client";
+
     private JFileChooser ftpChooser;
     private JFileChooser homeChooser;
     private JComponent filelister;
@@ -99,7 +101,6 @@ public class FTPFrame {
         dropTarget = new DropListener(upload);
         ftpChooser.addPropertyChangeListener(parser);
         ftpChooser.addActionListener(approveActions);
-        setTask(Task.download);
         filelister.setDropTarget(dropTarget);
         DebugPrinter.println(filelister.getClass().getName());
 
@@ -113,7 +114,9 @@ public class FTPFrame {
         splitPane.setDividerSize(0);
 
         isInit = true;
+
         buildFrame(splitPane);
+        setTask(Task.download);
     }
 
     public void uninit() {
@@ -147,7 +150,7 @@ public class FTPFrame {
 
     private void buildFrame(JComponent c) {
         if (frame == null) {
-            frame = new JFrame("SimpleFTP Client");
+            frame = new JFrame(TITLE);
             frame.setSize(800, 450);
             frame.setLocationRelativeTo(null);
             frame.setBackground(Console.DefaultBackground);
@@ -201,8 +204,14 @@ public class FTPFrame {
 
     public void setTask(Task task) {
         switch (task) {
-            case download -> ftpChooser.setApproveButtonText("Download");
-            case delete -> ftpChooser.setApproveButtonText("Delete");
+            case download -> {
+                ftpChooser.setApproveButtonText("Download");
+                frame.setTitle(TITLE + " (download-mode)");
+            }
+            case delete -> {
+                ftpChooser.setApproveButtonText("Delete");
+                frame.setTitle(TITLE + " (delete-mode)");
+            }
         }
 
         this.task = task;
