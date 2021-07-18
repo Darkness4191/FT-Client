@@ -44,8 +44,6 @@ public class FTPFrame {
     private Task task;
     private boolean isInit = false;
 
-    //Test commit
-
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
