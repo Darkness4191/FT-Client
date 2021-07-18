@@ -6,19 +6,26 @@ import com.google.gson.JsonParser;
 import de.dragon.UsefulThings.ut;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
-public class LoginBar extends JPanel implements ActionListener {
+public class LoginBar extends JPanel implements ActionListener, Runnable {
 
     private JPasswordField passwordField;
     private JTextField textField;
     private JTextField hostField;
 
     private FTPFrame parent;
+
+    private ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+    private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<>(2);
 
     public LoginBar(FTPFrame parent) throws IOException {
         this.parent = parent;
@@ -55,6 +62,8 @@ public class LoginBar extends JPanel implements ActionListener {
         add(textField);
         add(passwordField);
         add(loginButton);
+
+        threadPool.execute(this);
     }
 
     @Override
@@ -63,7 +72,22 @@ public class LoginBar extends JPanel implements ActionListener {
 
         if(!textField.getText().equals("") && !hostField.getText().equals("") && !s.equals("")) {
             try {
-                parent.printToConsole("Initializing...", Color.WHITE);
+                q.put(s);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+        } else {
+            parent.printToConsole("Error: Please specify host, username and password for the ftp Server", Color.RED);
+        }
+    }
+
+    @Override
+    public void run() {
+        while(true) {
+            try {
+                String s = q.take();
+
+                parent.getConsole().getPane().getDocument().insertString(parent.getConsole().getPane().getDocument().getLength(), "Initializing...\n", null);
                 LoginDetailsContainer container = new LoginDetailsContainer(hostField.getText(), textField.getText(), s);
                 parent.initFileChooser(container);
                 container.setPass("");
@@ -71,12 +95,10 @@ public class LoginBar extends JPanel implements ActionListener {
                 Gson gson = new Gson();
                 String jsons = gson.toJson(container);
                 ut.saveInfoToAppdata("FTPClient", "login_details", jsons);
-            } catch (UnsupportedLookAndFeelException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException unsupportedLookAndFeelException) {
+            } catch (UnsupportedLookAndFeelException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InterruptedException | BadLocationException unsupportedLookAndFeelException) {
                 parent.uninit();
                 unsupportedLookAndFeelException.printStackTrace();
             }
-        } else {
-            parent.printToConsole("Error: Please specify host, username and password for the ftp Server", Color.RED);
         }
     }
 }
