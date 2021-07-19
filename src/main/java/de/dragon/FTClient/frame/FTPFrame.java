@@ -67,6 +67,7 @@ public class FTPFrame {
         try {
             //init temp direc
             printToConsoleln("Initializing components...");
+            DebugPrinter.setPrint(true);
             if (ut.getTempFile("FTPClient", token).exists()) {
                 ut.deleteFileRec(ut.getTempFile("FTPClient", token));
             }
@@ -119,7 +120,6 @@ public class FTPFrame {
             //update fileview
             printToConsoleln("Connection fully established");
             printToConsoleln("Refreshing...");
-            parser.refreshView();
 
             //JFrame setup
             JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, filelister);
@@ -130,6 +130,8 @@ public class FTPFrame {
 
             buildFrame(splitPane);
             setTask(Task.download);
+
+            refreshView();
         } catch (Exception e) {
             criticalError(e);
             e.printStackTrace();

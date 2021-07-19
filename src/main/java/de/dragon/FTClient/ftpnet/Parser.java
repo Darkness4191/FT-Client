@@ -27,20 +27,19 @@ public class Parser implements PropertyChangeListener {
         currentDir = frame.PATH_TO_TEMP;
     }
 
-    public File parseFile(FTPFile file) throws IOException {
-        return parseFile(file.getName(), file.isDirectory());
+    public File parseFile(FTPFile file, String path) throws IOException {
+        return parseFile(file.getName(), path, file.isDirectory());
     }
 
-    private File parseFile(String filename, boolean isDirectory) throws IOException {
+    private File parseFile(String filename, String path, boolean isDirectory) throws IOException {
 
-        File poss = new File(currentDir.contains(filename) ? currentDir : currentDir + File.separator + filename);
+        String pathtoFile = path.contains(filename) ? path : path + File.separator + filename;
+        File poss = new File(pathtoFile);
 
         if (poss.exists()) {
-            DebugPrinter.println(String.format("Returning temp " + (isDirectory ? "folder" : "file") + " at %s", currentDir.contains(filename) ? currentDir : currentDir + File.separator + filename));
             return poss;
         } else {
-            DebugPrinter.println(String.format("Creating temp " + (isDirectory ? "folder" : "file") + " at %s", currentDir.contains(filename) ? currentDir : currentDir + File.separator + filename));
-            return ut.createAbsolutTempFile(currentDir.contains(filename) ? currentDir : currentDir + File.separator + filename, isDirectory);
+            return ut.createAbsolutTempFile(pathtoFile, isDirectory);
         }
     }
 
@@ -71,13 +70,11 @@ public class Parser implements PropertyChangeListener {
 
                     if (conainsName(currentDir, f.getName()) && !f.getName().equals("^^^")) {
                         DebugPrinter.println("Status: Changing to new directory " + f.getName());
-                        connector.getClient().changeWorkingDirectory(connector.getClient().printWorkingDirectory() + "/" + f.getName());
                         currentDir += File.separator + f.getName();
                         refreshView();
-                        parseFile("^^^", true);
+                        parseFile("^^^", currentDir, true);
                     } else if (new File(currentDir).getParentFile().getAbsolutePath().contains(frame.token) && f.getName().equals("^^^")) {
                         DebugPrinter.println("Status: Changing to parent directory " + f.getName());
-                        connector.getClient().changeToParentDirectory();
                         currentDir = new File(currentDir).getParentFile().getAbsolutePath();
                         refreshView();
                     }
@@ -104,7 +101,6 @@ public class Parser implements PropertyChangeListener {
             asyncParser.add(new ParseData(currentDir, true));
 
             frame.getFtpChooser().setCurrentDirectory(new File(currentDir));
-            frame.getFtpChooser().rescanCurrentDirectory();
         }
     }
 
