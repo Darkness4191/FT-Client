@@ -38,6 +38,7 @@ public class FTPFrame {
     private ApproveActions approveActions;
     private Upload upload;
     private DropListener dropTarget;
+    private DropField dropField;
 
     private JFrame frame;
     private Console con;
@@ -110,7 +111,7 @@ public class FTPFrame {
             upload = new Upload(parser);
 
             //droplistener
-            dropTarget = new DropListener(upload);
+            dropTarget = new DropListener(this);
             ftpChooser.addPropertyChangeListener(parser);
             ftpChooser.addActionListener(approveActions);
             filelister.setDropTarget(dropTarget);
@@ -154,6 +155,12 @@ public class FTPFrame {
 
             //add Menubar
             frame.setJMenuBar(new MenuBar(this));
+
+            //droplistener
+            dropField = new DropField();
+            dropField.setSize(frame.getSize());
+            dropField.setDropTarget(new DropListener(this));
+            frame.getRootPane().getLayeredPane().add(dropField, JLayeredPane.PALETTE_LAYER);
         } else {
             frame.remove(lastPainted);
         }
@@ -267,6 +274,10 @@ public class FTPFrame {
 
     public Upload getUpload() {
         return upload;
+    }
+
+    public DropField getDropField() {
+        return dropField;
     }
 
 }

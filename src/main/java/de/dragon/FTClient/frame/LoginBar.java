@@ -46,16 +46,19 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         passwordField.setFont(passwordField.getFont().deriveFont(11f));
 
         //adding listeners
-        TextFieldKeyListener listenerTextField = new TextFieldKeyListener(textField, "username");
-        TextFieldKeyListener listenerHostField = new TextFieldKeyListener(hostField, "host IP");
-        PasswordFieldKeyListener listenerPassField= new PasswordFieldKeyListener(passwordField, "password");
+        TextFieldKeyListener listenerTextField = new TextFieldKeyListener(textField, "username", parent);
+        TextFieldKeyListener listenerHostField = new TextFieldKeyListener(hostField, "host IP", parent);
+        PasswordFieldKeyListener listenerPassField= new PasswordFieldKeyListener(passwordField, "password", parent);
 
         textField.addKeyListener(listenerTextField);
         textField.addFocusListener(listenerTextField);
+        textField.addMouseListener(listenerTextField);
         hostField.addKeyListener(listenerHostField);
         hostField.addFocusListener(listenerHostField);
+        hostField.addMouseListener(listenerHostField);
         passwordField.addKeyListener(listenerPassField);
         passwordField.addFocusListener(listenerPassField);
+        passwordField.addMouseListener(listenerPassField);
 
         JButton loginButton = new JButton("Login");
         loginButton.addActionListener(this);
@@ -78,6 +81,10 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         hostField.setBorder(new GenericBorder());
         textField.setBorder(new GenericBorder());
         passwordField.setBorder(new GenericBorder());
+
+        textField.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+        hostField.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+        passwordField.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 
         add(hostField);
         add(textField);

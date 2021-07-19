@@ -1,13 +1,15 @@
 package de.dragon.FTClient.misc;
 
+import de.dragon.FTClient.frame.FTPFrame;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class PasswordFieldKeyListener extends TextFieldKeyListener {
 
 
-    public PasswordFieldKeyListener(JPasswordField passField, String s) {
-        super(passField, s);
+    public PasswordFieldKeyListener(JPasswordField passField, String s, FTPFrame frame) {
+        super(passField, s, frame);
     }
 
     @Override
