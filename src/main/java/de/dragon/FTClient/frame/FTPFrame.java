@@ -130,7 +130,7 @@ public class FTPFrame {
             buildFrame(splitPane);
             setTask(Task.download);
 
-            refreshView();
+            refreshView(true);
         } catch (Exception e) {
             criticalError(e);
             e.printStackTrace();
@@ -251,9 +251,9 @@ public class FTPFrame {
         return isInit;
     }
 
-    public void refreshView() throws IOException {
+    public void refreshView(boolean preload) throws IOException {
         if (isInit) {
-            parser.refreshView();
+            parser.refreshView(preload);
         }
     }
 

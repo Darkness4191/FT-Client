@@ -25,7 +25,7 @@ public class EnableHiddenFilesOption extends JCheckBoxMenuItem implements Action
             try {
                 state = !state;
                 frame.getClient().setListHiddenFiles(state);
-                frame.refreshView();
+                frame.refreshView(false);
             } catch (IOException ioException) {
                 state = false;
                 frame.criticalError(ioException);

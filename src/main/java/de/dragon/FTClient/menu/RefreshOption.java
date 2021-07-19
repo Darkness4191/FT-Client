@@ -20,7 +20,7 @@ public class RefreshOption extends FMenuItem {
     public void actionPerformed(ActionEvent e) {
         if(frame.isInit()) {
             try {
-                frame.refreshView();
+                frame.refreshView(false);
             } catch (IOException ioException) {
                 frame.criticalError(ioException);
                 ioException.printStackTrace();

@@ -87,7 +87,7 @@ public class ApproveActions implements ActionListener {
                     JOptionPane.showMessageDialog(null, String.format("Deleted %d files", selectedFiles.length), "Info", JOptionPane.INFORMATION_MESSAGE);
 
                     try {
-                        frame.refreshView();
+                        frame.refreshView(false);
                     } catch (IOException ioException) {
                         frame.criticalError(ioException);
                         ioException.printStackTrace();
