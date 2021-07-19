@@ -1,5 +1,9 @@
 package de.dragon.FTClient.ftpnet;
 
+import de.dragon.UsefulThings.ut;
+import org.apache.commons.net.ftp.FTPFile;
+
+import java.io.File;
 import java.util.LinkedList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
@@ -20,7 +24,7 @@ public class AsyncParser {
         this.parser = parser;
 
         executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
-        executor.submit(new Worker(lowPrio_q, highPrio_q, this, "/"));
+        executor.submit(this::worker);
     }
 
     public void addToLowPrio(ParseData data) {
@@ -33,6 +37,59 @@ public class AsyncParser {
         } else {
             highPrio_q.add(data);
         }
+    }
+
+    private void worker() {
+        while(true) {
+            try {
+                ParseData data = null;
+                if(!highPrio_q.isEmpty()) {
+                    data = highPrio_q.take();
+                } else {
+                    data = lowPrio_q.take();
+                }
+
+                String fromServer = data.getPath().replace(parser.getFrame().PATH_TO_TEMP, "").replace("\\", "/");
+                if(fromServer.equals("")) {
+                    fromServer = "/";
+                }
+
+                if(!already_build.contains(data.getPath())) {
+                    parser.parseFile("^^^", data.getPath(), true);
+                    already_build.add(data.getPath());
+                }
+
+                FTPFile[] files = parser.getConnector().getClient().listFiles(fromServer);
+                for(FTPFile c : files) {
+                    if(c.isDirectory() && data.preload()) {
+                        lowPrio_q.add(new ParseData(data.getPath() + File.separator + c.getName(), false));
+                    }
+                    parser.parseFile(c, data.getPath());
+                }
+
+                for (File c : new File(data.getPath()).listFiles()) {
+                    if (!conainsName(files, c.getName()) && !c.getName().equals("^^^")) {
+                        ut.deleteFileRec(c);
+                    }
+                }
+
+                if(parser.getFrame().getFtpChooser().getCurrentDirectory().getAbsolutePath().equals(data.getPath())) {
+                    parser.getFrame().getFtpChooser().rescanCurrentDirectory();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private boolean conainsName(FTPFile[] files, String name) {
+        for (FTPFile c : files) {
+            if (c.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Parser getParser() {
