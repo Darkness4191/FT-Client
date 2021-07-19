@@ -67,7 +67,6 @@ public class FTPFrame {
         try {
             //init temp direc
             printToConsoleln("Initializing components...");
-            DebugPrinter.setPrint(true);
             if (ut.getTempFile("FTPClient", token).exists()) {
                 ut.deleteFileRec(ut.getTempFile("FTPClient", token));
             }

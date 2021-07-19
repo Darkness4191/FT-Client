@@ -9,29 +9,45 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class Worker implements Runnable {
 
     private ArrayBlockingQueue<ParseData> q;
+    private ArrayBlockingQueue<ParseData> prio_q;
     private AsyncParser parent;
 
-    public Worker(ArrayBlockingQueue<ParseData> queue, AsyncParser parent) {
-        q = queue;
+    private String seperator;
+
+    public Worker(ArrayBlockingQueue<ParseData> queue, ArrayBlockingQueue<ParseData> prioQ, AsyncParser parent, String seperator) {
+        this.seperator = seperator;
         this.parent = parent;
+        this.prio_q = prioQ;
+        q = queue;
     }
 
     @Override
     public void run() {
         while(true) {
             try {
-                ParseData data = q.take();
-
-                String fromServer = data.getPath().replace(parent.getParser().getFrame().PATH_TO_TEMP, "").replace("\\", "/");
-                if(fromServer.equals("")) {
-                    fromServer = "/";
+                ParseData data = null;
+                if(!prio_q.isEmpty()) {
+                    data = prio_q.take();
+                } else {
+                    data = q.take();
                 }
+
+                String fromServer = data.getPath().replace(parent.getParser().getFrame().PATH_TO_TEMP, "").replace("\\", seperator);
+                if(fromServer.equals("")) {
+                    fromServer = seperator;
+                }
+
                 System.out.println(fromServer);
+
+                if(!parent.getAlready_build().contains(data.getPath())) {
+                    parent.getParser().parseFile("^^^", data.getPath(), true);
+                    parent.getAlready_build().add(data.getPath());
+                }
 
                 FTPFile[] files = parent.getParser().getConnector().getClient().listFiles(fromServer);
                 for(FTPFile c : files) {
                     if(c.isDirectory() && data.preload()) {
-                        parent.add(new ParseData(data.getPath() + File.separator + c.getName(), false));
+                        parent.addToLowPrio(new ParseData(data.getPath() + File.separator + c.getName(), false));
                     }
                     parent.getParser().parseFile(c, data.getPath());
                 }

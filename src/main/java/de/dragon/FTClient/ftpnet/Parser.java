@@ -25,13 +25,14 @@ public class Parser implements PropertyChangeListener {
 
         asyncParser = new AsyncParser(this);
         currentDir = frame.PATH_TO_TEMP;
+        asyncParser.getAlready_build().add(currentDir);
     }
 
     public File parseFile(FTPFile file, String path) throws IOException {
         return parseFile(file.getName(), path, file.isDirectory());
     }
 
-    private File parseFile(String filename, String path, boolean isDirectory) throws IOException {
+    protected File parseFile(String filename, String path, boolean isDirectory) throws IOException {
 
         String pathtoFile = path.contains(filename) ? path : path + File.separator + filename;
         File poss = new File(pathtoFile);
@@ -66,17 +67,15 @@ public class Parser implements PropertyChangeListener {
                 currentDir = abs.getAbsolutePath();
             } else if (f.getAbsolutePath().contains(frame.PATH_TO_TEMP)) {
                 try {
-                    String s = connector.getClient().printWorkingDirectory();
 
                     if (conainsName(currentDir, f.getName()) && !f.getName().equals("^^^")) {
                         DebugPrinter.println("Status: Changing to new directory " + f.getName());
                         currentDir += File.separator + f.getName();
                         refreshView();
-                        parseFile("^^^", currentDir, true);
                     } else if (new File(currentDir).getParentFile().getAbsolutePath().contains(frame.token) && f.getName().equals("^^^")) {
                         DebugPrinter.println("Status: Changing to parent directory " + f.getName());
                         currentDir = new File(currentDir).getParentFile().getAbsolutePath();
-                        refreshView();
+                        refreshView(false);
                     }
 
                 } catch (IOException e) {
@@ -97,10 +96,15 @@ public class Parser implements PropertyChangeListener {
     }
 
     public void refreshView() throws IOException {
+        refreshView(true);
+    }
+
+    public void refreshView(boolean preload) throws IOException {
         if (currentDir.contains(frame.PATH_TO_TEMP)) {
-            asyncParser.add(new ParseData(currentDir, true));
+            asyncParser.addToHighPrio(new ParseData(currentDir, preload));
 
             frame.getFtpChooser().setCurrentDirectory(new File(currentDir));
+            frame.getFtpChooser().rescanCurrentDirectory();
         }
     }
 
