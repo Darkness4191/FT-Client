@@ -10,7 +10,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class Parser implements PropertyChangeListener {
 
@@ -18,12 +17,13 @@ public class Parser implements PropertyChangeListener {
     private FTPFrame frame;
 
     private String currentDir;
-    private ArrayList<String> downloaded = new ArrayList<>();
+    private AsyncParser asyncParser;
 
     public Parser(Connector connector, FTPFrame frame) {
         this.connector = connector;
         this.frame = frame;
 
+        asyncParser = new AsyncParser(this);
         currentDir = frame.PATH_TO_TEMP;
     }
 
@@ -99,30 +99,9 @@ public class Parser implements PropertyChangeListener {
         return false;
     }
 
-    private boolean conainsName(FTPFile[] files, String name) {
-        for (FTPFile c : files) {
-            if (c.getName().equals(name)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void refreshView() throws IOException {
         if (currentDir.contains(frame.PATH_TO_TEMP)) {
-            File current = new File(currentDir);
-
-            FTPFile[] list = connector.getClient().listFiles();
-
-            for (File c : current.listFiles()) {
-                if (!conainsName(list, c.getName()) && !c.getName().equals("^^^")) {
-                    ut.deleteFileRec(c);
-                }
-            }
-
-            for (FTPFile c : list) {
-                parseFile(c);
-            }
+            asyncParser.add(new ParseData(currentDir, true));
 
             frame.getFtpChooser().setCurrentDirectory(new File(currentDir));
             frame.getFtpChooser().rescanCurrentDirectory();

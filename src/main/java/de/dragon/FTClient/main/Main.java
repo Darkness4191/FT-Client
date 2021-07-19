@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+    public static void main(String[] args) {
         try {
             new FTPFrame();
         } catch (IOException | UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
