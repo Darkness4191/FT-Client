@@ -84,7 +84,7 @@ public class FTPFrame {
             //TODO optimize parent file deletion
             DeleteOnExitReqCall.add(new File(PATH_TO_TEMP).getParentFile());
 
-            DebugPrinter.println(ut.merge(new String[]{System.getProperty("user.home"), "Temp", realToken, token}, File.separator));
+            DebugPrinter.println(PATH_TO_TEMP);
 
             //needs updated ftp file converted to file
             ftpChooser = new JFileChooser(PATH_TO_TEMP);
@@ -95,7 +95,7 @@ public class FTPFrame {
             new ConfigJFileChooser(ftpChooser);
 
             //login
-            printToConsoleln("Connecting to FTP server...");
+            printToConsoleln("Connecting to server...");
 
             try {
                 connector = new Connector(c.getHost(), c.getUser(), c.getPass());
