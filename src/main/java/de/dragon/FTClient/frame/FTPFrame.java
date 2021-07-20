@@ -18,6 +18,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class FTPFrame {
 
@@ -65,14 +66,13 @@ public class FTPFrame {
     public void initFileChooser(LoginDetailsContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, BadLocationException {
         try {
             //init temp direc
-            DebugPrinter.setPrint(true);
             printToConsoleln("Initializing components...");
             if (ut.getTempFile("FTPClient", token).exists()) {
                 ut.deleteFileRec(ut.getTempFile("FTPClient", token));
             }
 
             token = c.getHost() + "#" + c.getUser();
-            String realToken = new Token(20).encode();
+            String realToken = "FTC" + new Token(20).encode();
 
             if (System.getProperty("os.name").toLowerCase().contains("windows")) {
                 PATH_TO_TEMP = ut.createAbsolutTempFile(ut.merge(new String[]{System.getProperty("user.home"), "AppData", "Local", "Temp", realToken, token}, File.separator), true).getAbsolutePath();
@@ -101,7 +101,11 @@ public class FTPFrame {
                 connector = new Connector(c.getHost(), c.getUser(), c.getPass());
                 printToConsoleln("Connection attempt successful");
             } catch (IOException e) {
-                criticalError(e);
+                printToConsoleln("Error: " + e.getMessage());
+                e.printStackTrace();
+                TimeUnit.SECONDS.sleep(3);
+                con.flushConsole();
+                uninit();
                 return;
             }
 
@@ -245,10 +249,10 @@ public class FTPFrame {
     }
 
     public void criticalError(Exception e) {
+        JOptionPane.showMessageDialog(frame, "Error: " + e.getMessage() + "(" + connector.getClient().getReplyCode() + ")", "Error", JOptionPane.ERROR_MESSAGE);
         try {
             connector.reconnect();
         } catch (IOException ioException) {
-            JOptionPane.showMessageDialog(frame, "Critical Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             uninit();
             ioException.printStackTrace();
         }

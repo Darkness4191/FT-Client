@@ -2,8 +2,6 @@ package de.dragon.FTClient.frame;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import java.awt.*;
 
 public class GenericBorder implements Border {
@@ -11,7 +9,7 @@ public class GenericBorder implements Border {
     private Border border;
 
     public GenericBorder() {
-        border = BorderFactory.createEtchedBorder(EtchedBorder.RAISED);
+        border = BorderFactory.createLineBorder(new Color(177, 177, 177), 1);
     }
 
     @Override

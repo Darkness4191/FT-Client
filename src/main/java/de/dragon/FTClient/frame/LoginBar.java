@@ -60,7 +60,9 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         passwordField.addFocusListener(listenerPassField);
         passwordField.addMouseListener(listenerPassField);
 
-        JButton loginButton = new JButton("Login");
+        JButton loginButton = new JButton("Log In");
+        loginButton.setFont(hostField.getFont().deriveFont(10f));
+        loginButton.setUI(new ButtonUI());
         loginButton.addActionListener(this);
         loginButton.setFocusPainted(false);
 
@@ -81,6 +83,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         hostField.setBorder(new GenericBorder());
         textField.setBorder(new GenericBorder());
         passwordField.setBorder(new GenericBorder());
+        loginButton.setBorder(new GenericBorder());
 
         textField.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
         hostField.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
@@ -115,7 +118,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
             try {
                 String s = q.take();
 
-                parent.getConsole().getPane().getDocument().insertString(parent.getConsole().getPane().getDocument().getLength(), "Login information prepared", null);
+                parent.getConsole().getPane().getDocument().insertString(parent.getConsole().getPane().getDocument().getLength(), "Login information prepared\n", null);
                 LoginDetailsContainer container = new LoginDetailsContainer(hostField.getText(), textField.getText(), s);
                 parent.initFileChooser(container);
                 container.setPass("");
@@ -123,6 +126,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
                 Gson gson = new Gson();
                 String jsons = gson.toJson(container);
                 ut.saveInfoToAppdata("FTPClient", "login_details", jsons);
+                q.clear();
             } catch (UnsupportedLookAndFeelException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InterruptedException | BadLocationException unsupportedLookAndFeelException) {
                 parent.uninit();
                 unsupportedLookAndFeelException.printStackTrace();

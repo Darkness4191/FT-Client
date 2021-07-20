@@ -32,16 +32,16 @@ public class Connector {
         client.execPROT("P");
         client.login(user, pass);
 
+        if(!FTPReply.isPositiveCompletion(client.getReplyCode())) {
+            client.disconnect();
+            throw new FTPConnectionClosedException(String.format("Server Refused connection (%s)", client.getReplyCode()));
+        }
+
         client.setControlKeepAliveTimeout(300);
         client.setKeepAlive(true);
         client.sendNoOp();
 
         client.setListHiddenFiles(false);
-
-        if(!FTPReply.isPositiveCompletion(client.getReplyCode())) {
-            client.disconnect();
-            throw new FTPConnectionClosedException(String.format("FTP server connection refused. (%s)", client.getReplyCode()));
-        }
     }
 
     public void reconnect() throws IOException {

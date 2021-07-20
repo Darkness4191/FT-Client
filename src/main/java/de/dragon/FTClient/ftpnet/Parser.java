@@ -68,6 +68,8 @@ public class Parser implements PropertyChangeListener {
                         refreshView(false);
                     }
 
+                    frame.getFtpChooser().setSelectedFile(new File(""));
+
                 } catch (IOException e) {
                     frame.criticalError(e);
                     e.printStackTrace();
