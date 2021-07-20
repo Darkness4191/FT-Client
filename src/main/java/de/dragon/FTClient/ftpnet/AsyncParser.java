@@ -19,6 +19,10 @@ public class AsyncParser {
     private ThreadPoolExecutor executor;
 
     private Parser parser;
+    public boolean someoneWaiting = false;
+
+    private ArrayBlockingQueue<Integer> release = new ArrayBlockingQueue<>(10);
+    private ArrayBlockingQueue<Integer> interupt = new ArrayBlockingQueue<>(10);
 
     public AsyncParser(Parser parser) {
         this.parser = parser;
@@ -32,7 +36,7 @@ public class AsyncParser {
     }
 
     public void addToHighPrio(ParseData data) {
-        if(lowPrio_q.isEmpty()) {
+        if (lowPrio_q.isEmpty()) {
             lowPrio_q.add(data);
         } else {
             highPrio_q.add(data);
@@ -40,28 +44,28 @@ public class AsyncParser {
     }
 
     private void worker() {
-        while(true) {
+        while (true) {
             try {
                 ParseData data = null;
-                if(!highPrio_q.isEmpty()) {
+                if (!highPrio_q.isEmpty()) {
                     data = highPrio_q.take();
                 } else {
                     data = lowPrio_q.take();
                 }
 
                 String fromServer = data.getPath().replace(parser.getFrame().PATH_TO_TEMP, "").replace("\\", "/");
-                if(fromServer.equals("")) {
+                if (fromServer.equals("")) {
                     fromServer = "/";
                 }
 
-                if(!already_build.contains(data.getPath())) {
+                if (!already_build.contains(data.getPath())) {
                     parser.parseFile("^^^", data.getPath(), true);
                     already_build.add(data.getPath());
                 }
 
                 FTPFile[] files = parser.getConnector().getClient().listFiles(fromServer);
-                for(FTPFile c : files) {
-                    if(c.isDirectory() && data.preload()) {
+                for (FTPFile c : files) {
+                    if (c.isDirectory() && data.preload()) {
                         lowPrio_q.add(new ParseData(data.getPath() + File.separator + c.getName(), false));
                     }
                     parser.parseFile(c, data.getPath());
@@ -73,12 +77,18 @@ public class AsyncParser {
                     }
                 }
 
-                if(parser.getFrame().getFtpChooser().getCurrentDirectory().getAbsolutePath().equals(data.getPath())) {
+                if (parser.getFrame().getFtpChooser().getCurrentDirectory().getAbsolutePath().equals(data.getPath())) {
                     parser.getFrame().getFtpChooser().rescanCurrentDirectory();
                 }
 
+                if(someoneWaiting) {
+                    release.add(1);
+                    interupt.take();
+                    someoneWaiting = false;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
+                parser.getFrame().criticalError(e);
             }
         }
     }
@@ -94,6 +104,21 @@ public class AsyncParser {
 
     public Parser getParser() {
         return parser;
+    }
+
+    public void waitForRelease() {
+        if(!someoneWaiting) {
+            someoneWaiting = true;
+            try {
+                release.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void interuptComplete() {
+        interupt.add(1);
     }
 
     public LinkedList<String> getAlready_build() {

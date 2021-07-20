@@ -1,9 +1,6 @@
 package de.dragon.FTClient.frame;
 
-import de.dragon.FTClient.ftpnet.ApproveActions;
-import de.dragon.FTClient.ftpnet.Connector;
-import de.dragon.FTClient.ftpnet.Parser;
-import de.dragon.FTClient.ftpnet.Upload;
+import de.dragon.FTClient.ftpnet.*;
 import de.dragon.FTClient.menu.MenuBar;
 import de.dragon.FTClient.misc.DropListener;
 import de.dragon.UsefulThings.console.Console;
@@ -35,8 +32,9 @@ public class FTPFrame {
     private LoginBar menu;
     private Parser parser;
     private Connector connector;
-    private ApproveActions approveActions;
+    private Download download;
     private Upload upload;
+    private Delete delete;
     private DropListener dropTarget;
     private DropField dropField;
 
@@ -67,6 +65,7 @@ public class FTPFrame {
     public void initFileChooser(LoginDetailsContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, BadLocationException {
         try {
             //init temp direc
+            DebugPrinter.setPrint(true);
             printToConsoleln("Initializing components...");
             if (ut.getTempFile("FTPClient", token).exists()) {
                 ut.deleteFileRec(ut.getTempFile("FTPClient", token));
@@ -86,13 +85,13 @@ public class FTPFrame {
 
             DebugPrinter.println(PATH_TO_TEMP);
 
-            //needs updated ftp file converted to file
+            //jfilechooser setup
             ftpChooser = new JFileChooser(PATH_TO_TEMP);
-            ftpChooser.setOpaque(false);
             filelister = (JComponent) ftpChooser.getComponent(2);
 
             //config ftpchooser
-            new ConfigJFileChooser(ftpChooser);
+            ftpChooser.setMultiSelectionEnabled(true);
+            ftpChooser.setOpaque(false);
 
             //login
             printToConsoleln("Connecting to server...");
@@ -107,13 +106,15 @@ public class FTPFrame {
 
             printToConsoleln("Building parser");
             parser = new Parser(connector, this);
-            approveActions = new ApproveActions(parser);
+            download = new Download(parser);
+            delete = new Delete(parser);
             upload = new Upload(parser);
 
             //droplistener
             dropTarget = new DropListener(this);
             ftpChooser.addPropertyChangeListener(parser);
-            ftpChooser.addActionListener(approveActions);
+            ftpChooser.addActionListener(download);
+            ftpChooser.addActionListener(delete);
             filelister.setDropTarget(dropTarget);
             DebugPrinter.println(filelister.getClass().getName());
 
@@ -200,7 +201,8 @@ public class FTPFrame {
         connector = null;
         parser = null;
         upload = null;
-        approveActions = null;
+        delete = null;
+        download = null;
         ftpChooser = null;
         filelister = null;
         PATH_TO_TEMP = null;
@@ -242,8 +244,13 @@ public class FTPFrame {
     }
 
     public void criticalError(Exception e) {
-        JOptionPane.showMessageDialog(null, "Critical Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        uninit();
+        try {
+            connector.reconnect();
+        } catch (IOException ioException) {
+            JOptionPane.showMessageDialog(frame, "Critical Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            uninit();
+            ioException.printStackTrace();
+        }
     }
 
     public FTPSClient getClient() {

@@ -5,6 +5,7 @@ import de.dragon.FTClient.frame.FTPFrame;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 
 public class UploadFileOption extends FMenuItem {
 
@@ -28,9 +29,17 @@ public class UploadFileOption extends FMenuItem {
 
             if(r == JFileChooser.APPROVE_OPTION) {
                 for(File f : chooser.getSelectedFiles()) {
-                    frame.getUpload().addToQueue(f);
+                    try {
+                        if(!f.isDirectory()) {
+                            frame.getUpload().upload(f);
+                            frame.refreshView(false);
+                            JOptionPane.showMessageDialog(frame.getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    } catch (InterruptedException | IOException interruptedException) {
+                        interruptedException.printStackTrace();
+                    }
                 }
-                JOptionPane.showMessageDialog(null, String.format("Upload of %d files successful", chooser.getSelectedFiles().length), "Info", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(frame.getDropField(), String.format("Upload of %d files successful", chooser.getSelectedFiles().length), "Info", JOptionPane.INFORMATION_MESSAGE);
 
             }
 

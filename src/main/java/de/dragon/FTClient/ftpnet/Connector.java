@@ -1,5 +1,6 @@
 package de.dragon.FTClient.ftpnet;
 
+import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.commons.net.ftp.FTPSClient;
@@ -10,10 +11,22 @@ public class Connector {
 
     private FTPSClient client;
 
+    String user;
+    String host;
+    String pass;
+
     public Connector(String host, String user, String pass) throws IOException {
+        this.host = host;
+        this.user = user;
+        this.pass = pass;
+        connect(host, user, pass);
+    }
+
+    private void connect(String host, String user, String pass) throws IOException {
         client = new FTPSClient();
 
         client.connect(host);
+        client.setFileType(FTPClient.BINARY_FILE_TYPE);
         client.enterLocalPassiveMode();
         client.execPBSZ(0);
         client.execPROT("P");
@@ -29,7 +42,12 @@ public class Connector {
             client.disconnect();
             throw new FTPConnectionClosedException(String.format("FTP server connection refused. (%s)", client.getReplyCode()));
         }
+    }
 
+    public void reconnect() throws IOException {
+        if(client != null) {
+            connect(host, user, pass);
+        }
     }
 
     public void logout() {
