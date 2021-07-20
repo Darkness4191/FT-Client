@@ -107,7 +107,7 @@ public class AsyncParser {
     }
 
     public void waitForRelease() {
-        if(!someoneWaiting) {
+        if(!someoneWaiting && !lowPrio_q.isEmpty()) {
             someoneWaiting = true;
             try {
                 release.take();
@@ -118,7 +118,9 @@ public class AsyncParser {
     }
 
     public void interuptComplete() {
-        interupt.add(1);
+        if(someoneWaiting) {
+            interupt.add(1);
+        }
     }
 
     public LinkedList<String> getAlready_build() {

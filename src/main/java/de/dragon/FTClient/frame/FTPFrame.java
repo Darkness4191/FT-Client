@@ -91,6 +91,7 @@ public class FTPFrame {
 
             //config ftpchooser
             ftpChooser.setMultiSelectionEnabled(true);
+            ftpChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             ftpChooser.setOpaque(false);
 
             //login
