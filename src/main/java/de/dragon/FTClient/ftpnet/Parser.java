@@ -44,22 +44,6 @@ public class Parser implements PropertyChangeListener {
         }
     }
 
-    public FTPFile parseFTPFileBack(File file) throws IOException {
-        if(!asyncParser.someoneWaiting) {
-            asyncParser.waitForRelease();
-        }
-        for (FTPFile c : connector.getClient().listFiles(getCurrentDirOnServer())) {
-            if (c.getName().equals(file.getName())) {
-                return c;
-            }
-        }
-        if(!asyncParser.someoneWaiting) {
-            asyncParser.interuptComplete();
-        }
-
-        return null;
-    }
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         DebugPrinter.println("Property change: " + evt.getPropertyName());
@@ -140,6 +124,14 @@ public class Parser implements PropertyChangeListener {
             pathonServer = "/";
         }
         pathonServer += pathonServer.endsWith("/") ? path : "/" + path;
+        return pathonServer;
+    }
+
+    public String convertToFileOnServer(String path) {
+        String pathonServer = path.replace(frame.PATH_TO_TEMP, "").replace("\\", "/");
+        if(pathonServer.equals("")) {
+            pathonServer = "/";
+        }
         return pathonServer;
     }
 }

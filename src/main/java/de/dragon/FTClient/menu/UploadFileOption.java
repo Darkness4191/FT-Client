@@ -20,21 +20,19 @@ public class UploadFileOption extends FMenuItem {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(frame.isInit()) {
+        if (frame.isInit()) {
             JFileChooser chooser = new JFileChooser();
             chooser.setMultiSelectionEnabled(true);
             chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
             chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             int r = chooser.showDialog(null, "Upload");
 
-            if(r == JFileChooser.APPROVE_OPTION) {
-                for(File f : chooser.getSelectedFiles()) {
+            if (r == JFileChooser.APPROVE_OPTION) {
+                for (File f : chooser.getSelectedFiles()) {
                     try {
-                        if(!f.isDirectory()) {
-                            frame.getUpload().upload(f);
-                            frame.refreshView(false);
-                            JOptionPane.showMessageDialog(frame.getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
-                        }
+                        frame.getUpload().upload(f);
+                        frame.refreshView(false);
+                        JOptionPane.showMessageDialog(frame.getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
                     } catch (InterruptedException | IOException interruptedException) {
                         interruptedException.printStackTrace();
                     }

@@ -19,10 +19,10 @@ public class AsyncParser {
     private ThreadPoolExecutor executor;
 
     private Parser parser;
-    public boolean someoneWaiting = false;
+    public boolean isInterrputed = false;
 
     private ArrayBlockingQueue<Integer> release = new ArrayBlockingQueue<>(10);
-    private ArrayBlockingQueue<Integer> interupt = new ArrayBlockingQueue<>(10);
+    private ArrayBlockingQueue<Integer> interrupt = new ArrayBlockingQueue<>(10);
 
     public AsyncParser(Parser parser) {
         this.parser = parser;
@@ -81,10 +81,10 @@ public class AsyncParser {
                     parser.getFrame().getFtpChooser().rescanCurrentDirectory();
                 }
 
-                if(someoneWaiting) {
+                if(isInterrputed) {
                     release.add(1);
-                    interupt.take();
-                    someoneWaiting = false;
+                    interrupt.take();
+                    isInterrputed = false;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -106,9 +106,9 @@ public class AsyncParser {
         return parser;
     }
 
-    public void waitForRelease() {
-        if(!someoneWaiting && !lowPrio_q.isEmpty()) {
-            someoneWaiting = true;
+    public void interrupt() {
+        if(!isInterrputed && !lowPrio_q.isEmpty()) {
+            isInterrputed = true;
             try {
                 release.take();
             } catch (InterruptedException e) {
@@ -117,9 +117,9 @@ public class AsyncParser {
         }
     }
 
-    public void interuptComplete() {
-        if(someoneWaiting) {
-            interupt.add(1);
+    public void interruptComplete() {
+        if(isInterrputed) {
+            interrupt.add(1);
         }
     }
 

@@ -49,7 +49,7 @@ public class Download implements ActionListener {
 
             for (int i = 0; i < selectedFiles.length; i++) {
                 try {
-                    if (download(parser.parseFTPFileBack(selectedFiles[i]), download_dir)) {
+                    if (confirmDownload(selectedFiles[i], download_dir)) {
                         DebugPrinter.println("Download successful " + download_dir + File.separator + selectedFiles[i].getName());
                         passed++;
                     } else {
@@ -71,7 +71,7 @@ public class Download implements ActionListener {
         }
     }
 
-    public boolean download(FTPFile file, String folder) throws IOException {
+    public boolean confirmDownload(File f, String downloadPath) throws IOException {
         if (!always_approve) {
             int a = UserApproveDownload.ask();
 
@@ -80,23 +80,30 @@ public class Download implements ActionListener {
             }
 
             if (a == JOptionPane.OK_OPTION || a == JOptionPane.NO_OPTION) {
-                downloadFile(file, folder);
+                download(parser.getPathToFileOnServer(f.getName()), downloadPath, f.isDirectory(), f.getName());
                 return true;
             } else {
                 return false;
             }
         } else {
-            downloadFile(file, folder);
+            download(parser.getPathToFileOnServer(f.getName()), downloadPath, f.isDirectory(), f.getName());
             return true;
         }
     }
 
-    private void downloadFile(FTPFile file, String folder) throws IOException {
-        parser.getAsyncParser().waitForRelease();
-        FileOutputStream download = new FileOutputStream(new File(folder + File.separator + file.getName()));
-        connector.getClient().retrieveFile(parser.getPathToFileOnServer(file.getName()), download);
+    private void download(String pathOnServer, String downloadPath, boolean isDirectory, String filename) throws IOException {
+        parser.getAsyncParser().interrupt();
+        if(isDirectory) {
+            new File(downloadPath + File.separator + filename).mkdir();
+            for(FTPFile file : connector.getClient().listFiles(pathOnServer)) {
+                download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName());
+            }
+        } else {
+            FileOutputStream download = new FileOutputStream(new File(downloadPath + File.separator + filename));
+            connector.getClient().retrieveFile(pathOnServer, download);
 
-        download.close();
-        parser.getAsyncParser().interuptComplete();
+            download.close();
+        }
+        parser.getAsyncParser().interruptComplete();
     }
 }

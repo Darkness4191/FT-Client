@@ -20,23 +20,21 @@ public class Upload {
     }
 
     public void upload(File f) throws InterruptedException, IOException {
-        uploadToPath(f, parser.getCurrentDirOnServer());
+        parser.getAsyncParser().interrupt();
+        uploadToPath(f, parser.getPathToFileOnServer(f.getName()));
+        parser.getAsyncParser().interruptComplete();
     }
 
     private void uploadToPath(File f, String path) throws InterruptedException, IOException {
         if(f.isDirectory()) {
-            String nextpath = path + (path.endsWith("/") ?  f.getName() : "/" + f.getName());
-            connector.getClient().makeDirectory(nextpath);
+            connector.getClient().makeDirectory(path);
             for(File c : f.listFiles()) {
-                uploadToPath(c, nextpath);
+                uploadToPath(c, path + "/" + c.getName());
             }
         } else {
-            parser.getAsyncParser().waitForRelease();
             FileInputStream inputStream = new FileInputStream(f);
 
-            String s = path + (path.endsWith("/") ?  f.getName() : "/" + f.getName());
-
-            OutputStream out = connector.getClient().storeFileStream(path + (path.endsWith("/") ?  f.getName() : "/" + f.getName()));
+            OutputStream out = connector.getClient().storeFileStream(path);
             byte[] buffer = new byte[16 * 1024];
             int am;
             while((am = inputStream.read(buffer)) > 0) {
@@ -46,7 +44,6 @@ public class Upload {
             out.close();
             connector.getClient().completePendingCommand();
             inputStream.close();
-            parser.getAsyncParser().interuptComplete();
         }
     }
 }

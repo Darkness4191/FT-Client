@@ -14,31 +14,29 @@ import java.util.List;
 
 public class DropListener extends DropTarget {
 
-	private FTPFrame frame;
+    private FTPFrame frame;
 
-	public DropListener(FTPFrame frame) {
-		this.frame = frame;
-	}
+    public DropListener(FTPFrame frame) {
+        this.frame = frame;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public synchronized void drop(DropTargetDropEvent arg0) {
-		arg0.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-		if(frame.isInit()) {
-			try {
-				List<File> fileList = (List<File>) arg0.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-				for(File c : fileList) {
-					if(!c.isDirectory()) {
-						frame.getUpload().upload(c);
-						frame.refreshView(false);
-						JOptionPane.showMessageDialog(frame.getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
-					}
-				}
-			} catch (UnsupportedFlavorException | IOException | InterruptedException e1) {
-				e1.printStackTrace();
-			}
-		}
-		arg0.dropComplete(true);
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public synchronized void drop(DropTargetDropEvent arg0) {
+        arg0.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+        if (frame.isInit()) {
+            try {
+                List<File> fileList = (List<File>) arg0.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                for (File c : fileList) {
+                    frame.getUpload().upload(c);
+                    frame.refreshView(false);
+                    JOptionPane.showMessageDialog(frame.getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (UnsupportedFlavorException | IOException | InterruptedException e1) {
+                e1.printStackTrace();
+            }
+        }
+        arg0.dropComplete(true);
+    }
 
 }

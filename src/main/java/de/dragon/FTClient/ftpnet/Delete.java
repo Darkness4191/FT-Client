@@ -2,6 +2,7 @@ package de.dragon.FTClient.ftpnet;
 
 import de.dragon.FTClient.frame.FTPFrame;
 import de.dragon.FTClient.frame.Task;
+import org.apache.commons.net.ftp.FTPFile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,11 +34,12 @@ public class Delete implements ActionListener {
             if (answer == JOptionPane.YES_OPTION) {
 
                 frame.getFtpChooser().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                int deleted = 0;
                 for (int i = 0; i < selectedFiles.length; i++) {
                     try {
-                        parser.getAsyncParser().waitForRelease();
-                        parser.getConnector().getClient().deleteFile(parser.getPathToFileOnServer(selectedFiles[i].getName()));
-                        parser.getAsyncParser().interuptComplete();
+                        parser.getAsyncParser().interrupt();
+                        deleted += delete(parser.getPathToFileOnServer(selectedFiles[i].getName()), selectedFiles[i].getName(), selectedFiles[i].isDirectory());
+                        parser.getAsyncParser().interruptComplete();
                     } catch (IOException ioException) {
                         frame.criticalError(ioException);
                         ioException.printStackTrace();
@@ -46,7 +48,7 @@ public class Delete implements ActionListener {
 
                 frame.getFtpChooser().setCursor(null);
 
-                JOptionPane.showMessageDialog(frame.getDropField(), String.format("Deleted %d files", selectedFiles.length), "Info", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(frame.getDropField(), String.format("Deleted %d files", deleted), "Info", JOptionPane.INFORMATION_MESSAGE);
 
                 try {
                     frame.refreshView(false);
@@ -62,6 +64,20 @@ public class Delete implements ActionListener {
 
         } else if (e.getActionCommand().equals(JFileChooser.CANCEL_SELECTION)) {
             frame.collectTrashandExit();
+        }
+    }
+
+    public int delete(String pathOnServer, String filename, boolean isDirectory) throws IOException {
+        if(isDirectory) {
+            int sum = 0;
+            for(FTPFile file : parser.getConnector().getClient().listFiles(pathOnServer)) {
+                sum += delete(pathOnServer + "/" + file.getName(), file.getName(), file.isDirectory());
+            }
+            parser.getConnector().getClient().removeDirectory(pathOnServer);
+            return sum + 1;
+        } else {
+            parser.getConnector().getClient().deleteFile(pathOnServer);
+            return 1;
         }
     }
 }
