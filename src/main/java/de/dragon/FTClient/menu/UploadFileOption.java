@@ -32,8 +32,7 @@ public class UploadFileOption extends FMenuItem {
                     try {
                         frame.getUpload().upload(f);
                         frame.refreshView(false);
-                        JOptionPane.showMessageDialog(frame.getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
-                    } catch (InterruptedException | IOException interruptedException) {
+                    } catch (IOException interruptedException) {
                         interruptedException.printStackTrace();
                     }
                 }

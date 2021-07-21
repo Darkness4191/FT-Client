@@ -2,7 +2,6 @@ package de.dragon.FTClient.listeners;
 
 import de.dragon.FTClient.frame.FTPFrame;
 
-import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
@@ -29,10 +28,8 @@ public class DropListener extends DropTarget {
                 List<File> fileList = (List<File>) arg0.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
                 for (File c : fileList) {
                     frame.getUpload().upload(c);
-                    frame.refreshView(false);
-                    JOptionPane.showMessageDialog(frame.getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
                 }
-            } catch (UnsupportedFlavorException | IOException | InterruptedException e1) {
+            } catch (UnsupportedFlavorException | IOException e1) {
                 e1.printStackTrace();
             }
         }

@@ -4,7 +4,6 @@ import de.dragon.FTClient.frame.FTPFrame;
 import de.dragon.FTClient.frame.Task;
 import de.dragon.FTClient.frame.UserApproveDownload;
 import de.dragon.FTClient.frame.progressbar.ProgressBar;
-import de.dragon.UsefulThings.misc.DebugPrinter;
 import org.apache.commons.net.ftp.FTPFile;
 
 import javax.swing.*;
@@ -54,10 +53,8 @@ public class Download implements ActionListener {
                 progressBar.updateString(selectedFiles[i].getName());
                 try {
                     if (!selectedFiles[i].getName().equals("^^^") && confirmDownload(selectedFiles[i], download_dir)) {
-                        DebugPrinter.println("Download successful " + download_dir + File.separator + selectedFiles[i].getName());
                         passed++;
                     } else {
-                        DebugPrinter.println("Download failed " + selectedFiles[i].getName());
                         failed++;
                     }
                 } catch (IOException ioException) {
@@ -113,6 +110,6 @@ public class Download implements ActionListener {
 
             download.close();
         }
-        parser.getAsyncParser().interruptComplete();
+        parser.getAsyncParser().release();
     }
 }

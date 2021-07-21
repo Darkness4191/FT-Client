@@ -54,5 +54,4 @@ public class ProgressBar extends JProgressBar {
         parent.getFilelister().setEnabled(true);
         parent.getFrame().revalidate();
     }
-
 }

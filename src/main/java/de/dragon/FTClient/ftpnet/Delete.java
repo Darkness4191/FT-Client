@@ -39,7 +39,7 @@ public class Delete implements ActionListener {
                     try {
                         parser.getAsyncParser().interrupt();
                         deleted += delete(parser.getPathToFileOnServer(selectedFiles[i].getName()), selectedFiles[i].getName(), selectedFiles[i].isDirectory());
-                        parser.getAsyncParser().interruptComplete();
+                        parser.getAsyncParser().release();
                     } catch (IOException ioException) {
                         frame.criticalError(ioException);
                         ioException.printStackTrace();
@@ -62,8 +62,6 @@ public class Delete implements ActionListener {
 
             frame.getFtpChooser().setSelectedFile(new File(""));
 
-        } else if (e.getActionCommand().equals(JFileChooser.CANCEL_SELECTION)) {
-            frame.collectTrashandExit();
         }
     }
 

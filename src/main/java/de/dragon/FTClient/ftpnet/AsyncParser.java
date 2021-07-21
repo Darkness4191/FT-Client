@@ -81,7 +81,7 @@ public class AsyncParser {
                     parser.getFrame().getFtpChooser().rescanCurrentDirectory();
                 }
 
-                if(isInterrputed) {
+                if(!release.isEmpty()) {
                     release.add(1);
                     interrupt.take();
                     isInterrputed = false;
@@ -107,8 +107,8 @@ public class AsyncParser {
     }
 
     public void interrupt() {
-        if(!isInterrputed && !lowPrio_q.isEmpty()) {
-            isInterrputed = true;
+        isInterrputed = true;
+        if(!lowPrio_q.isEmpty()) {
             try {
                 release.take();
             } catch (InterruptedException e) {
@@ -117,7 +117,7 @@ public class AsyncParser {
         }
     }
 
-    public void interruptComplete() {
+    public void release() {
         if(isInterrputed) {
             interrupt.add(1);
         }
