@@ -322,4 +322,12 @@ public class FTPFrame {
         return ((JComponent) component).getComponent(i);
     }
 
+    public JFrame getFrame() {
+        return frame;
+    }
+
+    public LoginBar getMenu() {
+        return menu;
+    }
+
 }

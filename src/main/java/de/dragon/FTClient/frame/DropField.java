@@ -10,5 +10,4 @@ public class DropField extends JComponent {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 	}
-
 }

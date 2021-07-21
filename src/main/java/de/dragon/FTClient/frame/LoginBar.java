@@ -94,6 +94,10 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        event();
+    }
+
+    public void event() {
         String s = new String(passwordField.getPassword());
 
         if(!textField.getText().equals("") && !hostField.getText().equals("") && !s.equals("")) {

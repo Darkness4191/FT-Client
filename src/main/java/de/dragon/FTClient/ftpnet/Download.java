@@ -3,6 +3,7 @@ package de.dragon.FTClient.ftpnet;
 import de.dragon.FTClient.frame.FTPFrame;
 import de.dragon.FTClient.frame.Task;
 import de.dragon.FTClient.frame.UserApproveDownload;
+import de.dragon.FTClient.frame.progressbar.ProgressBar;
 import de.dragon.UsefulThings.misc.DebugPrinter;
 import org.apache.commons.net.ftp.FTPFile;
 
@@ -47,6 +48,8 @@ public class Download implements ActionListener {
             int passed = 0;
             int failed = 0;
 
+            ProgressBar progressBar = new ProgressBar(frame.getFrame());
+
             for (int i = 0; i < selectedFiles.length; i++) {
                 try {
                     if (!selectedFiles[i].getName().equals("^^^") && confirmDownload(selectedFiles[i], download_dir)) {
@@ -60,13 +63,16 @@ public class Download implements ActionListener {
                     frame.criticalError(ioException);
                     ioException.printStackTrace();
                 }
+                progressBar.updatePercent((i + 1) * 1D / selectedFiles.length, selectedFiles[i].getName());
             }
 
             if(passed > 0) {
                 JOptionPane.showMessageDialog(frame.getDropField(), String.format("Successful: %d, Failed: %d. Saved file to %s", passed, failed, download_dir), "Info", JOptionPane.INFORMATION_MESSAGE);
             }
+
             frame.getFtpChooser().setCursor(null);
             frame.getFtpChooser().setSelectedFile(new File(""));
+            progressBar.dispose();
 
         } else if (e.getActionCommand().equals(JFileChooser.CANCEL_SELECTION)) {
             frame.collectTrashandExit();
