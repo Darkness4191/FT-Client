@@ -64,7 +64,7 @@ public class Upload {
             int am;
             int rounds = 0;
             while((am = inputStream.read(buffer)) > 0) {
-                progressBar.updatePercent(rounds * am * 1D / filesize);
+                progressBar.updatePercent((rounds * buffer.length * 1D + am) / filesize);
                 out.write(buffer, 0, am);
                 out.flush();
                 rounds++;
