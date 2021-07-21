@@ -75,12 +75,12 @@ public class FTPFrame {
             }
 
             token = c.getHost() + "#" + c.getUser();
-            String realToken = "FTC" + new Token(20).encode();
+            String random = "FTC" + new Token(20).encode();
 
             if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-                PATH_TO_TEMP = ut.createAbsolutTempFile(ut.merge(new String[]{System.getProperty("user.home"), "AppData", "Local", "Temp", realToken, token}, File.separator), true).getAbsolutePath();
+                PATH_TO_TEMP = ut.createAbsolutTempFile(ut.merge(new String[]{System.getProperty("user.home"), "AppData", "Local", "Temp", random, token}, File.separator), true).getAbsolutePath();
             } else {
-                PATH_TO_TEMP = ut.createAbsolutTempFile(ut.merge(new String[]{System.getProperty("user.home"), "Temp", realToken, token}, File.separator), true).getAbsolutePath();
+                PATH_TO_TEMP = ut.createAbsolutTempFile(ut.merge(new String[]{System.getProperty("user.home"), "Temp", random, token}, File.separator), true).getAbsolutePath();
             }
 
             //TODO optimize parent file deletion
@@ -247,8 +247,12 @@ public class FTPFrame {
         buildFrame(splitPane);
     }
 
-    public void printToConsoleln(String s) throws BadLocationException {
-        con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), s + "\n", null);
+    public void printToConsoleln(String s) {
+        try {
+            con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), s + "\n", null);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
     }
 
     public Task getTask() {
@@ -304,10 +308,6 @@ public class FTPFrame {
 
     public void addActionListener(ActionListener listener) {
         ftpChooser.addActionListener(listener);
-    }
-
-    public Console getConsole() {
-        return con;
     }
 
     public Upload getUpload() {

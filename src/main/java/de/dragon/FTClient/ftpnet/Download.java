@@ -48,9 +48,10 @@ public class Download implements ActionListener {
             int passed = 0;
             int failed = 0;
 
-            ProgressBar progressBar = new ProgressBar(frame.getFrame());
+            ProgressBar progressBar = new ProgressBar(frame);
 
             for (int i = 0; i < selectedFiles.length; i++) {
+                progressBar.updateString(selectedFiles[i].getName());
                 try {
                     if (!selectedFiles[i].getName().equals("^^^") && confirmDownload(selectedFiles[i], download_dir)) {
                         DebugPrinter.println("Download successful " + download_dir + File.separator + selectedFiles[i].getName());
@@ -63,7 +64,7 @@ public class Download implements ActionListener {
                     frame.criticalError(ioException);
                     ioException.printStackTrace();
                 }
-                progressBar.updatePercent((i + 1) * 1D / selectedFiles.length, selectedFiles[i].getName());
+                progressBar.updatePercent((i + 1) * 1D / selectedFiles.length);
             }
 
             if(passed > 0) {

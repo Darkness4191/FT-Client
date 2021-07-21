@@ -42,7 +42,9 @@ public class TextFieldKeyListener extends BasicTextFieldListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        if((int) e.getKeyChar() == 10) {
+            frame.getMenu().event();
+        }
     }
 
     @Override
