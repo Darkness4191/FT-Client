@@ -1,8 +1,10 @@
 package de.dragon.FTClient.frame;
 
 import de.dragon.FTClient.ftpnet.*;
+import de.dragon.FTClient.listeners.FileDisplay;
 import de.dragon.FTClient.menu.MenuBar;
-import de.dragon.FTClient.misc.DropListener;
+import de.dragon.FTClient.listeners.BasicTextFieldListener;
+import de.dragon.FTClient.listeners.DropListener;
 import de.dragon.UsefulThings.console.Console;
 import de.dragon.UsefulThings.dir.DeleteOnExitReqCall;
 import de.dragon.UsefulThings.misc.DebugPrinter;
@@ -38,6 +40,7 @@ public class FTPFrame {
     private Delete delete;
     private DropListener dropTarget;
     private DropField dropField;
+    private JTextField filenameField;
 
     private JFrame frame;
     private Console con;
@@ -88,6 +91,25 @@ public class FTPFrame {
             //jfilechooser setup
             ftpChooser = new JFileChooser(PATH_TO_TEMP);
             filelister = (JComponent) ftpChooser.getComponent(2);
+            JComponent toDisable = (JComponent) getComponent(getComponent(filelister, 2), 2);
+            ((JLabel) getComponent(getComponent(toDisable.getParent(), 0), 1)).setText("Selected Files");
+            ((JLabel) getComponent(getComponent(toDisable.getParent(), 0), 1)).updateUI();
+
+            filenameField = new JTextField();
+            filenameField.addMouseListener(new BasicTextFieldListener(this));
+            filenameField.setSize(toDisable.getComponent(1).getSize());
+            filenameField.setFont(toDisable.getComponent(1).getFont());
+            Component filler1 = toDisable.getComponent(0);
+            Component filler2 = toDisable.getComponent(2);
+            Component dropdown = toDisable.getComponent(3);
+            toDisable.removeAll();
+            toDisable.add(filler1);
+            toDisable.add(filenameField);
+            toDisable.add(filler2);
+            toDisable.add(dropdown);
+
+            filelister.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
+            FileDisplay fileNameDisplay = new FileDisplay(ftpChooser, filenameField);
 
             //config ftpchooser
             ftpChooser.setMultiSelectionEnabled(true);
@@ -266,6 +288,10 @@ public class FTPFrame {
         return ftpChooser;
     }
 
+    public JComponent getFilelister() {
+        return filelister;
+    }
+
     public boolean isInit() {
         return isInit;
     }
@@ -290,6 +316,10 @@ public class FTPFrame {
 
     public DropField getDropField() {
         return dropField;
+    }
+
+    private Component getComponent(Component component, int i) {
+        return ((JComponent) component).getComponent(i);
     }
 
 }

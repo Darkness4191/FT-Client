@@ -3,8 +3,9 @@ package de.dragon.FTClient.frame;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import de.dragon.FTClient.misc.PasswordFieldKeyListener;
-import de.dragon.FTClient.misc.TextFieldKeyListener;
+import de.dragon.FTClient.listeners.BasicListenerConfig;
+import de.dragon.FTClient.listeners.PasswordFieldKeyListener;
+import de.dragon.FTClient.listeners.TextFieldKeyListener;
 import de.dragon.UsefulThings.ut;
 
 import javax.swing.*;
@@ -50,15 +51,9 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         TextFieldKeyListener listenerHostField = new TextFieldKeyListener(hostField, "host IP", parent);
         PasswordFieldKeyListener listenerPassField= new PasswordFieldKeyListener(passwordField, "password", parent);
 
-        textField.addKeyListener(listenerTextField);
-        textField.addFocusListener(listenerTextField);
-        textField.addMouseListener(listenerTextField);
-        hostField.addKeyListener(listenerHostField);
-        hostField.addFocusListener(listenerHostField);
-        hostField.addMouseListener(listenerHostField);
-        passwordField.addKeyListener(listenerPassField);
-        passwordField.addFocusListener(listenerPassField);
-        passwordField.addMouseListener(listenerPassField);
+        BasicListenerConfig.configAll(textField, listenerTextField);
+        BasicListenerConfig.configAll(hostField, listenerHostField);
+        BasicListenerConfig.configAll(passwordField, listenerPassField);
 
         JButton loginButton = new JButton("Log In");
         loginButton.setFont(hostField.getFont().deriveFont(10f));

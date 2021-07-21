@@ -1,4 +1,4 @@
-package de.dragon.FTClient.misc;
+package de.dragon.FTClient.listeners;
 
 import de.dragon.FTClient.frame.FTPFrame;
 

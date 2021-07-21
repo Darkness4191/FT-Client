@@ -1,12 +1,13 @@
-package de.dragon.FTClient.misc;
+package de.dragon.FTClient.listeners;
 
 import de.dragon.FTClient.frame.FTPFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 
-public class TextFieldKeyListener implements KeyListener, FocusListener, MouseListener {
+public class TextFieldKeyListener extends BasicTextFieldListener {
 
     protected JTextField textField;
 
@@ -15,6 +16,7 @@ public class TextFieldKeyListener implements KeyListener, FocusListener, MouseLi
     protected FTPFrame frame;
 
     public TextFieldKeyListener(JTextField textField, String s, FTPFrame frame) {
+        super(frame);
         this.textField = textField;
         this.s = s;
         this.frame = frame;
@@ -63,30 +65,5 @@ public class TextFieldKeyListener implements KeyListener, FocusListener, MouseLi
     @Override
     public void focusLost(FocusEvent e) {
         changeToPreWrite();
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        frame.getDropField().setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        frame.getDropField().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }
 }

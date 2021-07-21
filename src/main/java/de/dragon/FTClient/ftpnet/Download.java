@@ -49,7 +49,7 @@ public class Download implements ActionListener {
 
             for (int i = 0; i < selectedFiles.length; i++) {
                 try {
-                    if (confirmDownload(selectedFiles[i], download_dir)) {
+                    if (!selectedFiles[i].getName().equals("^^^") && confirmDownload(selectedFiles[i], download_dir)) {
                         DebugPrinter.println("Download successful " + download_dir + File.separator + selectedFiles[i].getName());
                         passed++;
                     } else {
@@ -62,8 +62,10 @@ public class Download implements ActionListener {
                 }
             }
 
+            if(passed > 0) {
+                JOptionPane.showMessageDialog(frame.getDropField(), String.format("Successful: %d, Failed: %d. Saved file to %s", passed, failed, download_dir), "Info", JOptionPane.INFORMATION_MESSAGE);
+            }
             frame.getFtpChooser().setCursor(null);
-            JOptionPane.showMessageDialog(frame.getDropField(), String.format("Successful: %d, Failed: %d. Saved file to %s", passed, failed, download_dir), "Info", JOptionPane.INFORMATION_MESSAGE);
             frame.getFtpChooser().setSelectedFile(new File(""));
 
         } else if (e.getActionCommand().equals(JFileChooser.CANCEL_SELECTION)) {
