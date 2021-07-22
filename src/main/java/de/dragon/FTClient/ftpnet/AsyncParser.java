@@ -122,10 +122,11 @@ public class AsyncParser {
     }
 
     public void release() {
-        if(currentlyWaiting > 0) {
+        if(currentlyWaiting > 0 && lowPrio_q.isEmpty() && highPrio_q.isEmpty()) {
             release.add(1);
+        } else {
+            interrupt.add(1);
         }
-        interrupt.add(1);
         currentlyInterrupting--;
     }
 

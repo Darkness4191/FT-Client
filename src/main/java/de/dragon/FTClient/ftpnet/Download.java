@@ -83,7 +83,7 @@ public class Download implements ActionListener {
                 }
                 frame.getFtpChooser().setSelectedFile(new File(""));
                 progressBar.dispose();
-
+                parser.refreshView(false);
                 parser.getAsyncParser().release();
             } catch(Exception e) {
                 parser.getFrame().criticalError(e);

@@ -43,6 +43,7 @@ public class Upload {
 
                 JOptionPane.showMessageDialog(parser.getFrame().getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
                 bar.dispose();
+                parser.refreshView(false);
                 parser.getAsyncParser().release();
             } catch(Exception e) {
                 parser.getFrame().criticalError(e);
