@@ -339,4 +339,8 @@ public class FTPFrame {
         return masterQueue;
     }
 
+    public JTextField getFilenameField() {
+        return filenameField;
+    }
+
 }

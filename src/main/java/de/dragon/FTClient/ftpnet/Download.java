@@ -23,7 +23,7 @@ public class Download implements ActionListener {
     private String download_dir;
     private FTPFrame frame;
     private Connector connector;
-    private ArrayBlockingQueue<File[]> q = new ArrayBlockingQueue<>(1000);
+    private ArrayBlockingQueue<File[]> q = new ArrayBlockingQueue<>(100);
 
     private boolean always_approve = false;
 
@@ -40,7 +40,7 @@ public class Download implements ActionListener {
         }
 
         download_dir = exi.getAbsolutePath();
-        executor.submit(this::take);
+        executor.submit(this::worker);
     }
 
     @Override
@@ -52,7 +52,8 @@ public class Download implements ActionListener {
         }
     }
 
-    private void take() {
+    private void worker() {
+        Thread.currentThread().setName("Download Thread");
         while(true) {
             try {
                 File[] files = q.take();

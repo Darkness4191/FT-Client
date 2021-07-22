@@ -13,6 +13,7 @@ public class MasterQueue {
     }
 
     private void run() {
+        Thread.currentThread().setName("Master");
         while(true) {
             try {
                 Event event = events.take();

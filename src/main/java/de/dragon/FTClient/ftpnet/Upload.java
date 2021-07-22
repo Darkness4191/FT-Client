@@ -25,14 +25,15 @@ public class Upload {
         this.connector = parser.getConnector();
         this.parser = parser;
 
-        executor.submit(this::take);
+        executor.submit(this::worker);
     }
 
     public void upload(File f) {
         q.add(f);
     }
 
-    private void take() {
+    private void worker() {
+        Thread.currentThread().setName("Upload Thread");
         while(true) {
             try {
                 File f = q.take();
