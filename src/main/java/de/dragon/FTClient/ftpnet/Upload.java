@@ -15,9 +15,9 @@ public class Upload {
 
     private Connector connector;
     private Parser parser;
-    private ArrayBlockingQueue<File> q = new ArrayBlockingQueue<>(100);
+    private ArrayBlockingQueue<File> q = new ArrayBlockingQueue<>(1000);
 
-    private ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+    private ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
     private boolean closed = false;
 
@@ -38,7 +38,9 @@ public class Upload {
                 File f = q.take();
                 parser.getAsyncParser().interrupt();
                 ProgressBar bar = new ProgressBar(parser.getFrame());
+                bar.init();
                 uploadToPath(f, parser.getPathToFileOnServer(f.getName()), bar);
+
                 JOptionPane.showMessageDialog(parser.getFrame().getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
                 bar.dispose();
                 parser.getAsyncParser().release();

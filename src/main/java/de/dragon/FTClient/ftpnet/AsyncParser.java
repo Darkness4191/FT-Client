@@ -19,7 +19,8 @@ public class AsyncParser {
     private ThreadPoolExecutor executor;
 
     private Parser parser;
-    public boolean isInterrputed = false;
+    private int currentlyInterrupting = 0;
+    private int currentlyWaiting = 0;
 
     private ArrayBlockingQueue<Integer> release = new ArrayBlockingQueue<>(10);
     private ArrayBlockingQueue<Integer> interrupt = new ArrayBlockingQueue<>(10);
@@ -53,6 +54,13 @@ public class AsyncParser {
                     data = lowPrio_q.take();
                 }
 
+                if (currentlyInterrupting > 0) {
+                    if(currentlyWaiting > 0) {
+                        release.add(1);
+                    }
+                    interrupt.take();
+                }
+
                 String fromServer = data.getPath().replace(parser.getFrame().PATH_TO_TEMP, "").replace("\\", "/");
                 if (fromServer.equals("")) {
                     fromServer = "/";
@@ -80,12 +88,6 @@ public class AsyncParser {
                 if (parser.getFrame().getFtpChooser().getCurrentDirectory().getAbsolutePath().equals(data.getPath())) {
                     parser.getFrame().getFtpChooser().rescanCurrentDirectory();
                 }
-
-                if(!release.isEmpty()) {
-                    release.add(1);
-                    interrupt.take();
-                    isInterrputed = false;
-                }
             } catch (Exception e) {
                 e.printStackTrace();
                 parser.getFrame().criticalError(e);
@@ -107,20 +109,24 @@ public class AsyncParser {
     }
 
     public void interrupt() {
-        isInterrputed = true;
-        if(!lowPrio_q.isEmpty()) {
-            try {
+        currentlyInterrupting++;
+        try {
+            if(!lowPrio_q.isEmpty() && !highPrio_q.isEmpty() || currentlyInterrupting > 1) {
+                currentlyWaiting++;
                 release.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                currentlyWaiting--;
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
     public void release() {
-        if(isInterrputed) {
-            interrupt.add(1);
+        if(currentlyWaiting > 0) {
+            release.add(1);
         }
+        interrupt.add(1);
+        currentlyInterrupting--;
     }
 
     public LinkedList<String> getAlready_build() {

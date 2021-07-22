@@ -7,24 +7,14 @@ import java.awt.*;
 
 public class ProgressBar extends JProgressBar {
 
-    public final double STEPS = 10000D;
-    private int max = (int) STEPS;
+    private int max = 10000;
 
     private FTPFrame parent;
+    private boolean isInit = false;
 
     public ProgressBar(FTPFrame frame) {
         super();
         this.parent = frame;
-        this.setPreferredSize(new Dimension((int) parent.getFrame().getSize().getWidth(), 20));
-        this.setStringPainted(true);
-        this.setString("");
-        this.setBorder(BorderFactory.createLineBorder(new Color(177, 177, 177), 2));
-        this.setForeground(new Color(38, 220, 71));
-        this.setBackground(new Color(34, 128, 45));
-        this.setUI(new ProgressBarUI());
-
-        parent.getFrame().add(this, BorderLayout.NORTH);
-        parent.getFrame().revalidate();
     }
 
     public ProgressBar(FTPFrame frame, int max) {
@@ -32,13 +22,30 @@ public class ProgressBar extends JProgressBar {
         this.max = max;
     }
 
+    public void init() {
+        if(!isInit) {
+            isInit = true;
+            this.setPreferredSize(new Dimension((int) parent.getFrame().getSize().getWidth(), 20));
+            this.setStringPainted(true);
+            this.setString("");
+            this.setMaximum(max);
+            this.setBorder(BorderFactory.createLineBorder(new Color(177, 177, 177), 2));
+            this.setForeground(new Color(38, 220, 71));
+            this.setBackground(new Color(34, 128, 45));
+            this.setUI(new ProgressBarUI());
+
+            parent.getFrame().add(this, BorderLayout.NORTH);
+            parent.getFrame().revalidate();
+        }
+    }
+
     public void updatePercent(double percent) {
-        update((int) (STEPS * percent));
+        update((int) (max * percent));
     }
 
     public void updatePercent(double percent, String string) {
         this.setString(string);
-        update((int) (STEPS * percent));
+        update((int) (max * percent));
     }
 
     public void update(int num) {
