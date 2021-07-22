@@ -34,21 +34,18 @@ public class Delete implements ActionListener {
             if (answer == JOptionPane.YES_OPTION) {
 
                 int deleted = 0;
-                parser.getAsyncParser().interrupt();
                 ProgressBar bar = new ProgressBar(frame);
                 for (int i = 0; i < selectedFiles.length; i++) {
                     try {
                         bar.updatePercent(i * 1D / selectedFiles.length, selectedFiles[i].getName());
                         deleted += delete(parser.getPathToFileOnServer(selectedFiles[i].getName()), selectedFiles[i].getName(), selectedFiles[i].isDirectory());
                     } catch (IOException ioException) {
-                        parser.getAsyncParser().release();
                         frame.criticalError(ioException);
                         ioException.printStackTrace();
                         break;
                     }
                 }
                 bar.dispose();
-                parser.getAsyncParser().release();
 
                 JOptionPane.showMessageDialog(frame.getDropField(), String.format("Deleted %d files", deleted), "Info", JOptionPane.INFORMATION_MESSAGE);
 

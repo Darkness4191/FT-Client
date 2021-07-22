@@ -36,7 +36,7 @@ public class Upload {
         while(true) {
             try {
                 File f = q.take();
-                parser.getAsyncParser().interrupt();
+
                 ProgressBar bar = new ProgressBar(parser.getFrame());
                 bar.init();
                 uploadToPath(f, parser.getPathToFileOnServer(f.getName()), bar);
@@ -44,7 +44,6 @@ public class Upload {
                 JOptionPane.showMessageDialog(parser.getFrame().getDropField(), "Upload complete", "Info", JOptionPane.INFORMATION_MESSAGE);
                 bar.dispose();
                 parser.refreshView(false);
-                parser.getAsyncParser().release();
             } catch(Exception e) {
                 parser.getFrame().criticalError(e);
             }
@@ -61,20 +60,26 @@ public class Upload {
             progressBar.updateString(f.getName());
             FileInputStream inputStream = new FileInputStream(f);
 
-            OutputStream out = connector.getClient().storeFileStream(path);
-            long filesize = f.length();
-            byte[] buffer = new byte[16 * 1024];
-            int am;
-            int rounds = 0;
-            while((am = inputStream.read(buffer)) > 0) {
-                progressBar.updatePercent((rounds * buffer.length * 1D + am) / filesize);
-                out.write(buffer, 0, am);
-                out.flush();
-                rounds++;
-            }
-            out.close();
-            connector.getClient().completePendingCommand();
-            inputStream.close();
+            parser.getFrame().getMasterQueue().put(() -> {
+                try {
+                    OutputStream out = connector.getClient().storeFileStream(path);
+                    long filesize = f.length();
+                    byte[] buffer = new byte[16 * 1024];
+                    int am;
+                    int rounds = 0;
+                    while((am = inputStream.read(buffer)) > 0) {
+                        progressBar.updatePercent((rounds * buffer.length * 1D + am) / filesize);
+                        out.write(buffer, 0, am);
+                        out.flush();
+                        rounds++;
+                    }
+                    out.close();
+                    connector.getClient().completePendingCommand();
+                    inputStream.close();
+                }catch (Exception e) {
+                    parser.getFrame().criticalError(e);
+                }
+            });
         }
     }
 }

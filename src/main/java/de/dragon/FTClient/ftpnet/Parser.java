@@ -106,10 +106,6 @@ public class Parser implements PropertyChangeListener {
         return frame;
     }
 
-    public AsyncParser getAsyncParser() {
-        return asyncParser;
-    }
-
     public String getCurrentDirOnServer() {
         String fromServer = currentDir.replace(frame.PATH_TO_TEMP, "").replace("\\", "/");
         if(fromServer.equals("")) {

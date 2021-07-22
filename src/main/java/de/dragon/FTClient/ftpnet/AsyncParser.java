@@ -4,6 +4,7 @@ import de.dragon.UsefulThings.ut;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
@@ -19,29 +20,13 @@ public class AsyncParser {
     private ThreadPoolExecutor executor;
 
     private Parser parser;
-    private int currentlyInterrupting = 0;
-    private int currentlyWaiting = 0;
-
-    private ArrayBlockingQueue<Integer> release = new ArrayBlockingQueue<>(10);
-    private ArrayBlockingQueue<Integer> interrupt = new ArrayBlockingQueue<>(10);
+    private FTPFile[] files;
 
     public AsyncParser(Parser parser) {
         this.parser = parser;
 
         executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(3);
         executor.submit(this::worker);
-    }
-
-    public void addToLowPrio(ParseData data) {
-        lowPrio_q.add(data);
-    }
-
-    public void addToHighPrio(ParseData data) {
-        if (lowPrio_q.isEmpty()) {
-            lowPrio_q.add(data);
-        } else {
-            highPrio_q.add(data);
-        }
     }
 
     private void worker() {
@@ -54,13 +39,6 @@ public class AsyncParser {
                     data = lowPrio_q.take();
                 }
 
-                if (currentlyInterrupting > 0) {
-                    if(currentlyWaiting > 0) {
-                        release.add(1);
-                    }
-                    interrupt.take();
-                }
-
                 String fromServer = data.getPath().replace(parser.getFrame().PATH_TO_TEMP, "").replace("\\", "/");
                 if (fromServer.equals("")) {
                     fromServer = "/";
@@ -71,7 +49,15 @@ public class AsyncParser {
                     already_build.add(data.getPath());
                 }
 
-                FTPFile[] files = parser.getConnector().getClient().listFiles(fromServer);
+                String finalFromServer = fromServer;
+                parser.getFrame().getMasterQueue().put(() -> {
+                    try {
+                        files = parser.getConnector().getClient().listFiles(finalFromServer);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
                 for (FTPFile c : files) {
                     if (c.isDirectory() && data.preload()) {
                         lowPrio_q.add(new ParseData(data.getPath() + File.separator + c.getName(), false));
@@ -95,6 +81,18 @@ public class AsyncParser {
         }
     }
 
+    public void addToLowPrio(ParseData data) {
+        lowPrio_q.add(data);
+    }
+
+    public void addToHighPrio(ParseData data) {
+        if (lowPrio_q.isEmpty()) {
+            lowPrio_q.add(data);
+        } else {
+            highPrio_q.add(data);
+        }
+    }
+
     private boolean conainsName(FTPFile[] files, String name) {
         for (FTPFile c : files) {
             if (c.getName().equals(name)) {
@@ -106,28 +104,6 @@ public class AsyncParser {
 
     public Parser getParser() {
         return parser;
-    }
-
-    public void interrupt() {
-        currentlyInterrupting++;
-        try {
-            if(!lowPrio_q.isEmpty() && !highPrio_q.isEmpty() || currentlyInterrupting > 1) {
-                currentlyWaiting++;
-                release.take();
-                currentlyWaiting--;
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void release() {
-        if(currentlyWaiting > 0 && lowPrio_q.isEmpty() && highPrio_q.isEmpty()) {
-            release.add(1);
-        } else {
-            interrupt.add(1);
-        }
-        currentlyInterrupting--;
     }
 
     public LinkedList<String> getAlready_build() {

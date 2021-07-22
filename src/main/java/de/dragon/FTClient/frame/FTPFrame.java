@@ -1,5 +1,6 @@
 package de.dragon.FTClient.frame;
 
+import de.dragon.FTClient.async.MasterQueue;
 import de.dragon.FTClient.ftpnet.*;
 import de.dragon.FTClient.listeners.FileDisplay;
 import de.dragon.FTClient.menu.MenuBar;
@@ -29,6 +30,8 @@ public class FTPFrame {
 
     private final String TITLE = "File Transfer Client";
 
+    private MasterQueue masterQueue;
+
     private JFileChooser ftpChooser;
     private JFileChooser homeChooser;
     private JComponent filelister;
@@ -52,6 +55,8 @@ public class FTPFrame {
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         UIManager.put("FileChooser.readOnly", Boolean.TRUE);
+
+        masterQueue = new MasterQueue();
 
         con = new Console(false);
         con.setEditable(false);
@@ -328,6 +333,10 @@ public class FTPFrame {
 
     public LoginBar getMenu() {
         return menu;
+    }
+
+    public MasterQueue getMasterQueue() {
+        return masterQueue;
     }
 
 }

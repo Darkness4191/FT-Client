@@ -59,7 +59,6 @@ public class Download implements ActionListener {
                 int passed = 0;
                 int failed = 0;
 
-                parser.getAsyncParser().interrupt();
                 ProgressBar progressBar = new ProgressBar(frame);
 
                 for (int i = 0; i < files.length; i++) {
@@ -84,7 +83,6 @@ public class Download implements ActionListener {
                 frame.getFtpChooser().setSelectedFile(new File(""));
                 progressBar.dispose();
                 parser.refreshView(false);
-                parser.getAsyncParser().release();
             } catch(Exception e) {
                 parser.getFrame().criticalError(e);
             }
@@ -112,27 +110,39 @@ public class Download implements ActionListener {
     private void download(String pathOnServer, String downloadPath, boolean isDirectory, String filename, ProgressBar bar) throws IOException {
         if(isDirectory) {
             new File(downloadPath + File.separator + filename).mkdir();
-            for(FTPFile file : connector.getClient().listFiles(pathOnServer)) {
-                download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName(), bar);
-            }
+            parser.getFrame().getMasterQueue().put(() -> {
+                try {
+                    for(FTPFile file : connector.getClient().listFiles(pathOnServer)) {
+                        download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName(), bar);
+                    }
+                } catch (Exception e) {
+                    parser.getFrame().criticalError(e);
+                }
+            });
         } else {
             bar.setString(filename);
             FileOutputStream download = new FileOutputStream(new File(downloadPath + File.separator + filename));
-            InputStream in = connector.getClient().retrieveFileStream(pathOnServer);
+            parser.getFrame().getMasterQueue().put(() -> {
+                try {
+                    InputStream in = connector.getClient().retrieveFileStream(pathOnServer);
 
-            long filesize = Long.parseLong(connector.getClient().getSize(pathOnServer));
-            byte[] buffer = new byte[16 * 1024];
-            int am;
-            int rounds = 0;
-            while((am = in.read(buffer)) > 0) {
-                bar.updatePercent((rounds * buffer.length * 1D + am) / filesize);
-                download.write(buffer, 0, am);
-                download.flush();
-                rounds++;
-            }
-            download.close();
-            in.close();
-            connector.getClient().completePendingCommand();
+                    long filesize = Long.parseLong(connector.getClient().getSize(pathOnServer));
+                    byte[] buffer = new byte[16 * 1024];
+                    int am;
+                    int rounds = 0;
+                    while((am = in.read(buffer)) > 0) {
+                        bar.updatePercent((rounds * buffer.length * 1D + am) / filesize);
+                        download.write(buffer, 0, am);
+                        download.flush();
+                        rounds++;
+                    }
+                    download.close();
+                    in.close();
+                    connector.getClient().completePendingCommand();
+                }catch (Exception e) {
+                    parser.getFrame().criticalError(e);
+                }
+            });
         }
     }
 }

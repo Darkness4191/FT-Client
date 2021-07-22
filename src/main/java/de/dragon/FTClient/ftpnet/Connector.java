@@ -31,6 +31,7 @@ public class Connector {
         client.execPBSZ(0);
         client.execPROT("P");
         client.login(user, pass);
+        client.setStrictMultilineParsing(true);
 
         if(!FTPReply.isPositiveCompletion(client.getReplyCode())) {
             client.disconnect();
