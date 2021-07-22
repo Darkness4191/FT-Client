@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class ProgressBar extends JProgressBar {
 
-    private int max = 1000;
+    private int max = 500;
 
     private FTPFrame parent;
     private boolean isInit = false;
