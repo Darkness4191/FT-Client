@@ -1,20 +1,22 @@
 package de.dragon.FTClient.async;
 
+import de.dragon.FTClient.ftpnet.Packet;
+
 public class Event {
 
     private Thread thread;
-    private Runnable runnable;
+    private Packet packet;
 
-    public Event(Thread executor, Runnable run) {
+    public Event(Thread executor, Packet run) {
         this.thread = executor;
-        this.runnable = run;
+        this.packet = run;
     }
 
     public Thread getThread() {
         return thread;
     }
 
-    public Runnable getRunnable() {
-        return runnable;
+    public Packet getRunnable() {
+        return packet;
     }
 }

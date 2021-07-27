@@ -1,33 +1,23 @@
 package de.dragon.FTClient.ftpnet;
 
 import de.dragon.FTClient.frame.FTPFrame;
-import de.dragon.FTClient.frame.Task;
-import de.dragon.FTClient.frame.UserApproveDownload;
 import de.dragon.FTClient.frame.progressbar.ProgressBar;
 import org.apache.commons.net.ftp.FTPFile;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
-public class Download implements ActionListener {
+public class Download extends Packet {
 
     private Parser parser;
     private String download_dir;
     private FTPFrame frame;
     private Connector connector;
-    private ArrayBlockingQueue<File[]> q = new ArrayBlockingQueue<>(100);
 
-    private boolean always_approve = false;
-
-    private ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+    private static boolean always_approve = false;
 
     public Download(Parser parser) {
         this.parser = parser;
@@ -40,59 +30,49 @@ public class Download implements ActionListener {
         }
 
         download_dir = exi.getAbsolutePath();
-        executor.submit(this::worker);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION) && parser.getFrame().getTask() == Task.download) {
-            q.add(frame.getFtpChooser().getSelectedFiles());
-        } else if (e.getActionCommand().equals(JFileChooser.CANCEL_SELECTION)) {
-            frame.collectTrashandExit();
-        }
-    }
+    public void execute() throws IOException {
+        int passed = 0;
+        int failed = 0;
 
-    private void worker() {
-        Thread.currentThread().setName("Download Thread");
-        while(true) {
+        ProgressBar progressBar = new ProgressBar(frame);
+
+        for (int i = 0; i < files.size(); i++) {
             try {
-                File[] files = q.take();
-                int passed = 0;
-                int failed = 0;
-
-                ProgressBar progressBar = new ProgressBar(frame);
-
-                for (int i = 0; i < files.length; i++) {
-                    try {
-                        if (!files[i].getName().equals("^^^") && confirmDownload()) {
-                            progressBar.init();
-                            download(parser.getPathToFileOnServer(files[i].getName()), download_dir, files[i].isDirectory(), files[i].getName(), progressBar);
-                            passed++;
-                        } else {
-                            failed++;
-                        }
-                    } catch (IOException ioException) {
-                        frame.criticalError(ioException);
-                        ioException.printStackTrace();
-                        break;
-                    }
+                if (!files.get(i).getName().equals("^^^") && confirmDownload()) {
+                    progressBar.init();
+                    download(parser.getPathToFileOnServer(files.get(i).getName()), download_dir, files.get(i).isDirectory(), files.get(i).getName(), progressBar);
+                    passed++;
+                } else {
+                    failed++;
                 }
-
-                if(passed > 0) {
-                    JOptionPane.showMessageDialog(frame.getDropField(), String.format("Successful: %d, Failed: %d. Saved file to %s", passed, failed, download_dir), "Info", JOptionPane.INFORMATION_MESSAGE);
-                }
-                frame.getFtpChooser().setSelectedFile(new File(""));
-                progressBar.dispose();
-                parser.refreshView(false);
-            } catch(Exception e) {
-                parser.getFrame().criticalError(e);
+            } catch (IOException ioException) {
+                frame.criticalError(ioException);
+                ioException.printStackTrace();
+                break;
             }
         }
+
+        if (passed > 0) {
+            JOptionPane.showMessageDialog(frame.getDropField(), String.format("Successful: %d, Failed: %d. Saved file to %s", passed, failed, download_dir), "Info", JOptionPane.INFORMATION_MESSAGE);
+        }
+        frame.getFtpChooser().setSelectedFile(new File(""));
+        progressBar.dispose();
+        parser.refreshView(false);
     }
 
     public boolean confirmDownload() throws IOException {
         if (!always_approve) {
-            int a = UserApproveDownload.ask();
+            int a = JOptionPane.showOptionDialog(null,
+                    "Do you want to download that ressource from the server?",
+                    "Approve Download",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,     //do not use a custom Icon
+                    new Object[]{"Yes", "Yes, don't ask me again", "No"},  //the titles of buttons
+                    "Yes");
 
             if (a == JOptionPane.NO_OPTION) {
                 always_approve = true;
@@ -100,50 +80,36 @@ public class Download implements ActionListener {
 
             if (a == JOptionPane.OK_OPTION || a == JOptionPane.NO_OPTION) {
                 return true;
-            } else {
+            } else
                 return false;
-            }
-        } else {
+        } else
             return true;
-        }
     }
 
     private void download(String pathOnServer, String downloadPath, boolean isDirectory, String filename, ProgressBar bar) throws IOException {
-        if(isDirectory) {
+        if (isDirectory) {
             new File(downloadPath + File.separator + filename).mkdir();
-            parser.getFrame().getMasterQueue().put(() -> {
-                try {
-                    for(FTPFile file : connector.getClient().listFiles(pathOnServer)) {
-                        download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName(), bar);
-                    }
-                } catch (Exception e) {
-                    parser.getFrame().criticalError(e);
-                }
-            });
+            for (FTPFile file : connector.getClient().listFiles(pathOnServer)) {
+                download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName(), bar);
+            }
         } else {
             bar.setString(filename);
             FileOutputStream download = new FileOutputStream(new File(downloadPath + File.separator + filename));
-            parser.getFrame().getMasterQueue().put(() -> {
-                try {
-                    InputStream in = connector.getClient().retrieveFileStream(pathOnServer);
+            InputStream in = connector.getClient().retrieveFileStream(pathOnServer);
 
-                    long filesize = Long.parseLong(connector.getClient().getSize(pathOnServer));
-                    byte[] buffer = new byte[16 * 1024];
-                    int am;
-                    int rounds = 0;
-                    while((am = in.read(buffer)) > 0) {
-                        bar.updatePercent((rounds * buffer.length * 1D + am) / filesize);
-                        download.write(buffer, 0, am);
-                        download.flush();
-                        rounds++;
-                    }
-                    download.close();
-                    in.close();
-                    connector.getClient().completePendingCommand();
-                }catch (Exception e) {
-                    parser.getFrame().criticalError(e);
-                }
-            });
+            long filesize = Long.parseLong(connector.getClient().getSize(pathOnServer));
+            byte[] buffer = new byte[16 * 1024];
+            int am;
+            int rounds = 0;
+            while ((am = in.read(buffer)) > 0) {
+                bar.updatePercent((rounds * buffer.length * 1D + am) / filesize);
+                download.write(buffer, 0, am);
+                download.flush();
+                rounds++;
+            }
+            download.close();
+            in.close();
+            connector.getClient().completePendingCommand();
         }
     }
 }

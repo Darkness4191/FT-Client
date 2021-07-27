@@ -1,4 +1,4 @@
-package de.dragon.FTClient.main;
+package de.dragon.FTClient;
 
 import de.dragon.FTClient.frame.FTPFrame;
 import de.dragon.UsefulThings.dir.DeleteOnExitReqCall;

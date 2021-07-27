@@ -20,7 +20,7 @@ public class AsyncParser {
     private ThreadPoolExecutor executor;
 
     private Parser parser;
-    private FTPFile[] files;
+    private FTPFile[] filelist;
 
     public AsyncParser(Parser parser) {
         this.parser = parser;
@@ -50,15 +50,14 @@ public class AsyncParser {
                 }
 
                 String finalFromServer = fromServer;
-                parser.getFrame().getMasterQueue().put(() -> {
-                    try {
-                        files = parser.getConnector().getClient().listFiles(finalFromServer);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                parser.getFrame().getMasterQueue().send(new Packet() {
+                    @Override
+                    public void execute() throws IOException, InterruptedException {
+                        filelist = parser.getConnector().getClient().listFiles(finalFromServer);
                     }
                 });
 
-                for (FTPFile c : files) {
+                for (FTPFile c : filelist) {
                     if (c.isDirectory() && data.preload()) {
                         lowPrio_q.add(new ParseData(data.getPath() + File.separator + c.getName(), false));
                     }
@@ -66,7 +65,7 @@ public class AsyncParser {
                 }
 
                 for (File c : new File(data.getPath()).listFiles()) {
-                    if (!conainsName(files, c.getName()) && !c.getName().equals("^^^")) {
+                    if (!conainsName(filelist, c.getName()) && !c.getName().equals("^^^")) {
                         ut.deleteFileRec(c);
                     }
                 }

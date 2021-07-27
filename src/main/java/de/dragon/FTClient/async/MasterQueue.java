@@ -1,45 +1,58 @@
 package de.dragon.FTClient.async;
 
+import de.dragon.FTClient.frame.FTPFrame;
+import de.dragon.FTClient.ftpnet.Packet;
+
+import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class MasterQueue {
 
     private ArrayBlockingQueue<Event> events = new ArrayBlockingQueue<Event>(5000);
     public Thread master;
+    private FTPFrame frame;
 
-    public MasterQueue() {
+    public MasterQueue(FTPFrame frame) {
         master = new Thread(this::run);
         master.start();
     }
 
     private void run() {
         Thread.currentThread().setName("Master");
-        while(true) {
+        while (true) {
             try {
                 Event event = events.take();
-                event.getRunnable().run();
+                event.getRunnable().execute();
                 synchronized (event.getThread()) {
                     event.getThread().notify();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                frame.criticalError(e);
             }
         }
     }
 
-    public void put(Runnable run) {
-        if(!Thread.currentThread().equals(master)) {
-            events.add(new Event(Thread.currentThread(), run));
-            try {
+    public void sendAndWait(Packet run) {
+        try {
+            if (!Thread.currentThread().equals(master)) {
+                events.add(new Event(Thread.currentThread(), run));
                 synchronized (Thread.currentThread()) {
                     Thread.currentThread().wait();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } else {
+                run.execute();
             }
-        } else {
-            run.run();
+        } catch (IOException | InterruptedException e) {
+            frame.criticalError(e);
         }
+    }
+
+    public void send(Packet run) {
+        events.add(new Event(Thread.currentThread(), run));
+    }
+
+    public void clearList() {
+        events.clear();
     }
 
 }

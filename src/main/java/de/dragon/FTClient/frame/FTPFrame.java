@@ -2,6 +2,7 @@ package de.dragon.FTClient.frame;
 
 import de.dragon.FTClient.async.MasterQueue;
 import de.dragon.FTClient.ftpnet.*;
+import de.dragon.FTClient.listeners.FileChooserListener;
 import de.dragon.FTClient.listeners.FileDisplay;
 import de.dragon.FTClient.menu.MenuBar;
 import de.dragon.FTClient.listeners.BasicTextFieldListener;
@@ -23,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class FTPFrame {
+public class FTPFrame extends JFrame {
 
     public String PATH_TO_TEMP;
     public String token;
@@ -38,14 +39,9 @@ public class FTPFrame {
     private LoginBar menu;
     private Parser parser;
     private Connector connector;
-    private Download download;
-    private Upload upload;
-    private Delete delete;
-    private DropListener dropTarget;
     private DropField dropField;
     private JTextField filenameField;
 
-    private JFrame frame;
     private Console con;
 
     private JComponent lastPainted;
@@ -56,7 +52,7 @@ public class FTPFrame {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         UIManager.put("FileChooser.readOnly", Boolean.TRUE);
 
-        masterQueue = new MasterQueue();
+        masterQueue = new MasterQueue(this);
 
         con = new Console(false);
         con.setEditable(false);
@@ -138,15 +134,12 @@ public class FTPFrame {
 
             printToConsoleln("Building parser");
             parser = new Parser(connector, this);
-            download = new Download(parser);
-            delete = new Delete(parser);
-            upload = new Upload(parser);
+
 
             //droplistener
-            dropTarget = new DropListener(this);
+            DropListener dropTarget = new DropListener(this);
             ftpChooser.addPropertyChangeListener(parser);
-            ftpChooser.addActionListener(download);
-            ftpChooser.addActionListener(delete);
+            ftpChooser.addActionListener(new FileChooserListener(parser));
             filelister.setDropTarget(dropTarget);
             DebugPrinter.println(filelister.getClass().getName());
 
@@ -172,14 +165,14 @@ public class FTPFrame {
     }
 
     private void buildFrame(JComponent c) {
-        if (frame == null) {
-            frame = new JFrame(TITLE);
-            frame.setSize(800, 450);
-            frame.setLocationRelativeTo(null);
-            frame.setBackground(Console.DefaultBackground);
+        if (!isInit) {
+            this.setTitle(TITLE);
+            this.setSize(800, 450);
+            this.setLocationRelativeTo(null);
+            this.setBackground(Console.DefaultBackground);
 
-            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            frame.addWindowListener(new WindowAdapter() {
+            this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            this.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosing(WindowEvent e) {
                     collectTrashandExit();
@@ -187,22 +180,22 @@ public class FTPFrame {
             });
 
             //add Menubar
-            frame.setJMenuBar(new MenuBar(this));
+            this.setJMenuBar(new MenuBar(this));
 
             //droplistener
             dropField = new DropField();
-            dropField.setSize(frame.getSize());
+            dropField.setSize(this.getSize());
             dropField.setDropTarget(new DropListener(this));
-            frame.getRootPane().getLayeredPane().add(dropField, JLayeredPane.PALETTE_LAYER);
+            this.getRootPane().getLayeredPane().add(dropField, JLayeredPane.PALETTE_LAYER);
         } else {
-            frame.remove(lastPainted);
+            this.remove(lastPainted);
         }
 
-        frame.add(c, BorderLayout.CENTER);
+        this.add(c, BorderLayout.CENTER);
         lastPainted = c;
 
-        frame.setVisible(true);
-        frame.revalidate();
+        this.setVisible(true);
+        this.revalidate();
     }
 
     public void collectTrashandExit() {
@@ -229,12 +222,11 @@ public class FTPFrame {
             }
         }
 
+        masterQueue.clearList();
+
         isInit = false;
         connector = null;
         parser = null;
-        upload = null;
-        delete = null;
-        download = null;
         ftpChooser = null;
         filelister = null;
         PATH_TO_TEMP = null;
@@ -268,11 +260,11 @@ public class FTPFrame {
         switch (task) {
             case download -> {
                 ftpChooser.setApproveButtonText("Download");
-                frame.setTitle(TITLE + " (download-mode)");
+                this.setTitle(TITLE + " (download-mode)");
             }
             case delete -> {
                 ftpChooser.setApproveButtonText("Delete");
-                frame.setTitle(TITLE + " (delete-mode)");
+                this.setTitle(TITLE + " (delete-mode)");
             }
         }
 
@@ -280,7 +272,7 @@ public class FTPFrame {
     }
 
     public void criticalError(Exception e) {
-        JOptionPane.showMessageDialog(frame, "Error: " + e.getMessage() + "(" + connector.getClient().getReplyCode() + ")", "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage() + "(" + connector.getClient().getReplyCode() + ")", "Error", JOptionPane.ERROR_MESSAGE);
         try {
             connector.reconnect();
         } catch (IOException ioException) {
@@ -315,20 +307,12 @@ public class FTPFrame {
         ftpChooser.addActionListener(listener);
     }
 
-    public Upload getUpload() {
-        return upload;
-    }
-
     public DropField getDropField() {
         return dropField;
     }
 
     private Component getComponent(Component component, int i) {
         return ((JComponent) component).getComponent(i);
-    }
-
-    public JFrame getFrame() {
-        return frame;
     }
 
     public LoginBar getMenu() {
