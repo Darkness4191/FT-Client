@@ -91,7 +91,7 @@ public class Parser implements PropertyChangeListener {
 
     public void refreshView(boolean preload) throws IOException {
         if (currentDir.contains(frame.PATH_TO_TEMP)) {
-            asyncParser.addToHighPrio(new ParseData(currentDir, preload));
+            asyncParser.addToHighPrio(new Data(currentDir, preload));
 
             frame.getFtpChooser().setCurrentDirectory(new File(currentDir));
             frame.getFtpChooser().rescanCurrentDirectory();

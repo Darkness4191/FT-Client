@@ -137,7 +137,7 @@ public class FTPFrame extends JFrame {
 
 
             //droplistener
-            DropListener dropTarget = new DropListener(this);
+            DropListener dropTarget = new DropListener(this, parser);
             ftpChooser.addPropertyChangeListener(parser);
             ftpChooser.addActionListener(new FileChooserListener(parser));
             filelister.setDropTarget(dropTarget);
@@ -180,12 +180,12 @@ public class FTPFrame extends JFrame {
             });
 
             //add Menubar
-            this.setJMenuBar(new MenuBar(this));
+            this.setJMenuBar(new MenuBar(this, parser));
 
             //droplistener
             dropField = new DropField();
             dropField.setSize(this.getSize());
-            dropField.setDropTarget(new DropListener(this));
+            dropField.setDropTarget(new DropListener(this, parser));
             this.getRootPane().getLayeredPane().add(dropField, JLayeredPane.PALETTE_LAYER);
         } else {
             this.remove(lastPainted);

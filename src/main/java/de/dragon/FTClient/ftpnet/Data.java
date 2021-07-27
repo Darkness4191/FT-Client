@@ -1,11 +1,11 @@
 package de.dragon.FTClient.ftpnet;
 
-public class ParseData {
+public class Data {
 
     private boolean preload;
     private String path;
 
-    public ParseData(String path, boolean preload) {
+    public Data(String path, boolean preload) {
         this.path = path;
         this.preload = preload;
     }

@@ -1,16 +1,17 @@
 package de.dragon.FTClient.menu;
 
 import de.dragon.FTClient.frame.FTPFrame;
+import de.dragon.FTClient.ftpnet.Parser;
 
 import javax.swing.*;
 
 public class MenuBar extends JMenuBar {
 
-    public MenuBar(FTPFrame frame) {
+    public MenuBar(FTPFrame frame, Parser parser) {
         super();
 
         JMenu file = new JMenu("File");
-        file.add(new UploadFileOption(frame));
+        file.add(new UploadFileOption(frame, parser));
         file.add(new DeleteOption(frame));
         file.add(new LogoutOption(frame));
 

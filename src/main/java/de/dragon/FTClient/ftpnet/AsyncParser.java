@@ -12,8 +12,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class AsyncParser {
 
-    private ArrayBlockingQueue<ParseData> lowPrio_q = new ArrayBlockingQueue<>(100);
-    private ArrayBlockingQueue<ParseData> highPrio_q = new ArrayBlockingQueue<>(100);
+    private ArrayBlockingQueue<Data> lowPrio_q = new ArrayBlockingQueue<>(100);
+    private ArrayBlockingQueue<Data> highPrio_q = new ArrayBlockingQueue<>(100);
 
     private LinkedList<String> already_build = new LinkedList<>();
 
@@ -32,7 +32,7 @@ public class AsyncParser {
     private void worker() {
         while (true) {
             try {
-                ParseData data = null;
+                Data data = null;
                 if (!highPrio_q.isEmpty()) {
                     data = highPrio_q.take();
                 } else {
@@ -59,7 +59,7 @@ public class AsyncParser {
 
                 for (FTPFile c : filelist) {
                     if (c.isDirectory() && data.preload()) {
-                        lowPrio_q.add(new ParseData(data.getPath() + File.separator + c.getName(), false));
+                        lowPrio_q.add(new Data(data.getPath() + File.separator + c.getName(), false));
                     }
                     parser.parseFile(c, data.getPath());
                 }
@@ -80,11 +80,11 @@ public class AsyncParser {
         }
     }
 
-    public void addToLowPrio(ParseData data) {
+    public void addToLowPrio(Data data) {
         lowPrio_q.add(data);
     }
 
-    public void addToHighPrio(ParseData data) {
+    public void addToHighPrio(Data data) {
         if (lowPrio_q.isEmpty()) {
             lowPrio_q.add(data);
         } else {

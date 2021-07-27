@@ -25,7 +25,7 @@ public class ProgressBar extends JProgressBar {
     public void init() {
         if(!isInit) {
             isInit = true;
-            this.setPreferredSize(new Dimension((int) parent.getFrame().getSize().getWidth(), 20));
+            this.setPreferredSize(new Dimension((int) parent.getSize().getWidth(), 20));
             this.setStringPainted(true);
             this.setString("");
             this.setMaximum(max);
@@ -34,8 +34,8 @@ public class ProgressBar extends JProgressBar {
             this.setBackground(new Color(34, 128, 45));
             this.setUI(new ProgressBarUI());
 
-            parent.getFrame().add(this, BorderLayout.NORTH);
-            parent.getFrame().revalidate();
+            parent.add(this, BorderLayout.NORTH);
+            parent.revalidate();
         }
     }
 
@@ -57,8 +57,8 @@ public class ProgressBar extends JProgressBar {
     }
 
     public void dispose() {
-        parent.getFrame().remove(this);
+        parent.remove(this);
         parent.getFilelister().setEnabled(true);
-        parent.getFrame().revalidate();
+        parent.revalidate();
     }
 }
