@@ -49,7 +49,9 @@ public class FTPFrame extends JFrame {
     private boolean isInit = false;
 
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        if(System.getProperty("os.name").toLowerCase().contains("windows")) {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
         UIManager.put("FileChooser.readOnly", Boolean.TRUE);
 
         masterQueue = new MasterQueue(this);
@@ -272,12 +274,18 @@ public class FTPFrame extends JFrame {
     }
 
     public void criticalError(Exception e) {
-        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage() + "(" + connector.getClient().getReplyCode() + ")", "Error", JOptionPane.ERROR_MESSAGE);
-        try {
-            connector.reconnect();
-        } catch (IOException ioException) {
+        if(isInit) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage() + "(" + connector.getClient().getReplyCode() + ")", "Error", JOptionPane.ERROR_MESSAGE);
+            try {
+                connector.reconnect();
+            } catch (IOException ioException) {
+                uninit();
+                ioException.printStackTrace();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
             uninit();
-            ioException.printStackTrace();
         }
     }
 
