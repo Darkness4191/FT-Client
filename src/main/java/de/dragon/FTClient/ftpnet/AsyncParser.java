@@ -39,7 +39,7 @@ public class AsyncParser {
                     data = lowPrio_q.take();
                 }
 
-                String fromServer = data.getPath().replace(parser.getFrame().PATH_TO_TEMP, "").replace("\\", "/");
+                String fromServer = data.getPath().replace(parser.getFrame().PATH_TO_TEMP, "").replace(File.separator, "/");
                 if (fromServer.equals("")) {
                     fromServer = "/";
                 }

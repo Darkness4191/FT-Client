@@ -107,7 +107,7 @@ public class Parser implements PropertyChangeListener {
     }
 
     public String getCurrentDirOnServer() {
-        String fromServer = currentDir.replace(frame.PATH_TO_TEMP, "").replace("\\", "/");
+        String fromServer = currentDir.replace(frame.PATH_TO_TEMP, "").replace(File.separator, "/");
         if(fromServer.equals("")) {
             fromServer = "/";
         }
@@ -115,7 +115,7 @@ public class Parser implements PropertyChangeListener {
     }
 
     public String getPathToFileOnServer(String path) {
-        String pathonServer = currentDir.replace(frame.PATH_TO_TEMP, "").replace("\\", "/");
+        String pathonServer = currentDir.replace(frame.PATH_TO_TEMP, "").replace(File.separator, "/");
         if(pathonServer.equals("")) {
             pathonServer = "/";
         }
@@ -124,7 +124,7 @@ public class Parser implements PropertyChangeListener {
     }
 
     public String convertToFileOnServer(String path) {
-        String pathonServer = path.replace(frame.PATH_TO_TEMP, "").replace("\\", "/");
+        String pathonServer = path.replace(frame.PATH_TO_TEMP, "").replace(File.separator, "/");
         if(pathonServer.equals("")) {
             pathonServer = "/";
         }
