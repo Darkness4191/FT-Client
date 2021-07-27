@@ -2,7 +2,7 @@ package de.dragon.FTClient.frame;
 
 import de.dragon.FTClient.async.MasterQueue;
 import de.dragon.FTClient.ftpnet.*;
-import de.dragon.FTClient.listeners.FileChooserListener;
+import de.dragon.FTClient.listeners.MainListener;
 import de.dragon.FTClient.listeners.FileDisplay;
 import de.dragon.FTClient.menu.MenuBar;
 import de.dragon.FTClient.listeners.BasicTextFieldListener;
@@ -137,9 +137,9 @@ public class FTPFrame extends JFrame {
 
 
             //droplistener
-            DropListener dropTarget = new DropListener(this, parser);
+            DropListener dropTarget = new DropListener(this);
             ftpChooser.addPropertyChangeListener(parser);
-            ftpChooser.addActionListener(new FileChooserListener(parser));
+            ftpChooser.addActionListener(new MainListener(parser));
             filelister.setDropTarget(dropTarget);
             DebugPrinter.println(filelister.getClass().getName());
 
@@ -185,7 +185,7 @@ public class FTPFrame extends JFrame {
             //droplistener
             dropField = new DropField();
             dropField.setSize(this.getSize());
-            dropField.setDropTarget(new DropListener(this, parser));
+            dropField.setDropTarget(new DropListener(this));
             this.getRootPane().getLayeredPane().add(dropField, JLayeredPane.PALETTE_LAYER);
         } else {
             this.remove(lastPainted);
@@ -214,7 +214,7 @@ public class FTPFrame extends JFrame {
     }
 
     public void uninit() {
-        if(connector != null) {
+        if (connector != null) {
             try {
                 connector.getClient().disconnect();
             } catch (IOException e) {
@@ -325,6 +325,10 @@ public class FTPFrame extends JFrame {
 
     public JTextField getFilenameField() {
         return filenameField;
+    }
+
+    public Parser getParser() {
+        return parser;
     }
 
 }

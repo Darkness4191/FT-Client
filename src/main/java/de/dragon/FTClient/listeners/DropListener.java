@@ -1,7 +1,6 @@
 package de.dragon.FTClient.listeners;
 
 import de.dragon.FTClient.frame.FTPFrame;
-import de.dragon.FTClient.ftpnet.Parser;
 import de.dragon.FTClient.ftpnet.Upload;
 
 import java.awt.datatransfer.DataFlavor;
@@ -16,11 +15,9 @@ import java.util.List;
 public class DropListener extends DropTarget {
 
     private FTPFrame frame;
-    private Parser parser;
 
-    public DropListener(FTPFrame frame, Parser parser) {
+    public DropListener(FTPFrame frame) {
         this.frame = frame;
-        this.parser = parser;
     }
 
     @SuppressWarnings("unchecked")
@@ -30,7 +27,7 @@ public class DropListener extends DropTarget {
         if (frame.isInit()) {
             try {
                 List<File> fileList = (List<File>) arg0.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-                Upload upload = new Upload(parser);
+                Upload upload = new Upload(frame.getParser());
                 upload.addFiles(fileList.toArray(new File[]{}));
                 frame.getMasterQueue().send(upload);
             } catch (UnsupportedFlavorException | IOException e1) {

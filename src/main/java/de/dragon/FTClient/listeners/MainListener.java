@@ -7,12 +7,13 @@ import de.dragon.FTClient.ftpnet.Parser;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
-public class FileChooserListener implements ActionListener {
+public class MainListener implements ActionListener {
 
     private Parser parser;
 
-    public FileChooserListener(Parser parser) {
+    public MainListener(Parser parser) {
         this.parser = parser;
     }
 
@@ -26,11 +27,16 @@ public class FileChooserListener implements ActionListener {
                     parser.getFrame().getMasterQueue().send(download);
                 }
                 case delete -> {
-                    Delete delete = new Delete(parser);
-                    delete.addFiles(parser.getFrame().getFtpChooser().getSelectedFiles());
-                    parser.getFrame().getMasterQueue().send(delete);
+                    int answer = JOptionPane.showConfirmDialog(parser.getFrame().getDropField(), "Do you really want to delete the selected files?", "Confirm", JOptionPane.YES_NO_OPTION);
+                    if (answer == JOptionPane.YES_OPTION) {
+                        Delete delete = new Delete(parser);
+                        delete.addFiles(parser.getFrame().getFtpChooser().getSelectedFiles());
+                        parser.getFrame().getMasterQueue().send(delete);
+                    }
                 }
             }
+            parser.getFrame().getFtpChooser().setSelectedFile(new File(""));
+            parser.getFrame().getFtpChooser().setSelectedFiles(new File[]{new File("")});
         } else if (e.getActionCommand().equals(JFileChooser.CANCEL_SELECTION)) {
             parser.getFrame().collectTrashandExit();
         }

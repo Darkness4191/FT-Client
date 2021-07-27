@@ -50,7 +50,7 @@ public class AsyncParser {
                 }
 
                 String finalFromServer = fromServer;
-                parser.getFrame().getMasterQueue().send(new Packet() {
+                parser.getFrame().getMasterQueue().sendAndWait(new Packet() {
                     @Override
                     public void execute() throws IOException, InterruptedException {
                         filelist = parser.getConnector().getClient().listFiles(finalFromServer);

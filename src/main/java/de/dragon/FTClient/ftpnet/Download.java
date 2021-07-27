@@ -58,7 +58,6 @@ public class Download extends Packet {
         if (passed > 0) {
             JOptionPane.showMessageDialog(frame.getDropField(), String.format("Successful: %d, Failed: %d. Saved file to %s", passed, failed, download_dir), "Info", JOptionPane.INFORMATION_MESSAGE);
         }
-        frame.getFtpChooser().setSelectedFile(new File(""));
         progressBar.dispose();
         parser.refreshView(false);
     }
