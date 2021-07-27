@@ -26,6 +26,15 @@
         </dependency>
     </dependencies>
 
+    <developers>
+        <developer>
+            <id>dragon</id>
+            <name>Dragon777</name>
+            <email>dragon.git@outlook.de</email>
+            <url>http://www.example.com/jdoe</url>
+        </developer>
+    </developers>
+
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
