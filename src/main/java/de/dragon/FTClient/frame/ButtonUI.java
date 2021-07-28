@@ -15,9 +15,9 @@ public class ButtonUI extends BasicButtonUI implements java.io.Serializable, Mou
 
     protected Color m_backgroundNormal = UIManager.getColor("TextField.background");
 
-    protected Color m_backgroundActive = m_backgroundNormal.getRGB() != new Color(255, 255, 255).getRGB() ? m_backgroundNormal.brighter() : m_backgroundNormal.darker();
+    protected Color m_backgroundActive = m_backgroundNormal.getRGB() != new Color(255, 255, 255).getRGB() ? m_backgroundNormal.brighter() : new Color(205, 234, 246, 255);
 
-    protected Color m_backgroundPressed = m_backgroundActive;
+    protected Color m_backgroundPressed = m_backgroundActive.darker();
 
 
     public static ComponentUI createUI(JComponent c) {
@@ -41,7 +41,7 @@ public class ButtonUI extends BasicButtonUI implements java.io.Serializable, Mou
         AbstractButton b = (AbstractButton) c;
         Dimension d = b.getSize();
 
-        g.setFont(c.getFont());
+        g.setFont(new Font("Tahoma", Font.BOLD, 11));
         FontMetrics fm = g.getFontMetrics();
 
         g.setColor(b.getForeground());

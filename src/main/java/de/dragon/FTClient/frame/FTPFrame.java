@@ -1,12 +1,13 @@
 package de.dragon.FTClient.frame;
 
 import de.dragon.FTClient.async.MasterQueue;
-import de.dragon.FTClient.ftpnet.*;
-import de.dragon.FTClient.listeners.MainListener;
-import de.dragon.FTClient.listeners.FileDisplay;
-import de.dragon.FTClient.menu.MenuBar;
+import de.dragon.FTClient.ftpnet.Connector;
+import de.dragon.FTClient.ftpnet.Parser;
 import de.dragon.FTClient.listeners.BasicTextFieldListener;
 import de.dragon.FTClient.listeners.DropListener;
+import de.dragon.FTClient.listeners.FileDisplay;
+import de.dragon.FTClient.listeners.MainListener;
+import de.dragon.FTClient.menu.MenuBar;
 import de.dragon.UsefulThings.console.Console;
 import de.dragon.UsefulThings.dir.DeleteOnExitReqCall;
 import de.dragon.UsefulThings.misc.DebugPrinter;
@@ -56,6 +57,7 @@ public class FTPFrame extends JFrame {
 
         con = new Console(false);
         con.setEditable(false);
+        con.getPane().setBackground(Console.DefaultBackground);
         con.getPane().setOpaque(true);
 
         //menubar
@@ -139,6 +141,7 @@ public class FTPFrame extends JFrame {
                 e.printStackTrace();
                 TimeUnit.SECONDS.sleep(3);
                 con.flushConsole();
+                isInit = true;
                 uninit();
                 return;
             }
