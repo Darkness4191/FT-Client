@@ -44,9 +44,9 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         textField = new JTextField();
         hostField = new JTextField();
 
-        textField.setFont(textField.getFont().deriveFont(11f));
-        hostField.setFont(hostField.getFont().deriveFont(11f));
-        passwordField.setFont(passwordField.getFont().deriveFont(11f));
+        textField.setFont(textField.getFont().deriveFont(12f));
+        hostField.setFont(hostField.getFont().deriveFont(12f));
+        passwordField.setFont(passwordField.getFont().deriveFont(12f));
 
         //adding listeners
         TextFieldKeyListener listenerTextField = new TextFieldKeyListener(textField, "username", parent);
@@ -58,7 +58,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         BasicListenerConfig.configAll(passwordField, listenerPassField);
 
         JButton loginButton = new JButton("Log In");
-        loginButton.setFont(hostField.getFont().deriveFont(10f));
+        loginButton.setFont(hostField.getFont().deriveFont(12f));
         loginButton.setBackground(UIManager.getColor("TextField.background"));
         loginButton.setUI(new ButtonUI());
         loginButton.addActionListener(this);
