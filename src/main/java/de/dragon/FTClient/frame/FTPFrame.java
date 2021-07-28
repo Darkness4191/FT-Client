@@ -49,15 +49,14 @@ public class FTPFrame extends JFrame {
     private boolean isInit = false;
 
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
-        if(System.getProperty("os.name").toLowerCase().contains("windows")) {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        }
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         UIManager.put("FileChooser.readOnly", Boolean.TRUE);
 
         masterQueue = new MasterQueue(this);
 
         con = new Console(false);
         con.setEditable(false);
+        con.getPane().setOpaque(true);
 
         //menubar
         menu = new LoginBar(this);
@@ -119,6 +118,8 @@ public class FTPFrame extends JFrame {
             } else if(System.getProperty("os.name").toLowerCase().contains("linux")){
                 ftpChooser.getComponent(0).setVisible(false);
                 getComponent(ftpChooser.getComponent(1), 0).setVisible(false);
+                getComponent(ftpChooser.getComponent(1), 3).setVisible(false);
+
                 filelister = ftpChooser;
             }
 
@@ -234,7 +235,6 @@ public class FTPFrame extends JFrame {
 
         masterQueue.clearList();
 
-        isInit = false;
         connector = null;
         parser = null;
         ftpChooser = null;
@@ -252,6 +252,7 @@ public class FTPFrame extends JFrame {
         splitPane.setBackground(Console.DefaultBackground);
 
         buildFrame(splitPane);
+        isInit = false;
     }
 
     public void printToConsoleln(String s) {

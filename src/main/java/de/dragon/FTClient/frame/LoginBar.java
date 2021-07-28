@@ -32,6 +32,8 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
 
     public LoginBar(FTPFrame parent) throws IOException {
         this.parent = parent;
+        this.setBackground(Color.WHITE);
+        this.setOpaque(true);
 
         GridLayout layout = new GridLayout();
         layout.setColumns(4);
@@ -45,9 +47,6 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         textField.setFont(textField.getFont().deriveFont(11f));
         hostField.setFont(hostField.getFont().deriveFont(11f));
         passwordField.setFont(passwordField.getFont().deriveFont(11f));
-        textField.setBackground(Color.WHITE);
-        hostField.setBackground(Color.WHITE);
-        passwordField.setBackground(Color.WHITE);
 
         //adding listeners
         TextFieldKeyListener listenerTextField = new TextFieldKeyListener(textField, "username", parent);
@@ -60,10 +59,11 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
 
         JButton loginButton = new JButton("Log In");
         loginButton.setFont(hostField.getFont().deriveFont(10f));
-        loginButton.setBackground(Color.WHITE);
+        loginButton.setBackground(UIManager.getColor("TextField.background"));
         loginButton.setUI(new ButtonUI());
         loginButton.addActionListener(this);
         loginButton.setFocusPainted(false);
+        loginButton.setForeground(UIManager.getColor("TextField.foreground"));
 
         if(ut.getTempFile("FTPClient", "login_details.save").exists()) {
             JsonElement json = new JsonParser().parse(new FileReader(ut.getTempFile("FTPClient", "login_details.save")));

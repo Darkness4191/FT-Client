@@ -28,7 +28,7 @@ public class TextFieldKeyListener extends BasicTextFieldListener {
         if(!already_changed) {
             already_changed = true;
             textField.setText("");
-            textField.setForeground(Color.BLACK);
+            textField.setForeground(UIManager.getColor("TextField.foreground"));
         }
     }
 
