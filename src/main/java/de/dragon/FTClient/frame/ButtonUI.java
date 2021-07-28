@@ -41,7 +41,7 @@ public class ButtonUI extends BasicButtonUI implements java.io.Serializable, Mou
         AbstractButton b = (AbstractButton) c;
         Dimension d = b.getSize();
 
-        g.setFont(new Font("Tahoma", Font.BOLD, 11));
+        g.setFont(new Font("Tahoma", System.getProperty("os.name").toLowerCase().contains("windows") ? Font.BOLD : Font.PLAIN, 11));
         FontMetrics fm = g.getFontMetrics();
 
         g.setColor(b.getForeground());
