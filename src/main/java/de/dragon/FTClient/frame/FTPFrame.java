@@ -64,7 +64,8 @@ public class FTPFrame extends JFrame {
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
         splitPane.setDividerLocation(23);
         splitPane.setDividerSize(0);
-        splitPane.setBackground(Console.DefaultBackground);
+        splitPane.setBackground(Color.WHITE);
+        splitPane.setOpaque(false);
 
         buildFrame(splitPane);
     }
@@ -93,26 +94,33 @@ public class FTPFrame extends JFrame {
 
             //jfilechooser setup
             ftpChooser = new JFileChooser(PATH_TO_TEMP);
-            filelister = (JComponent) ftpChooser.getComponent(2);
-            JComponent toDisable = (JComponent) getComponent(getComponent(filelister, 2), 2);
-            ((JLabel) getComponent(getComponent(toDisable.getParent(), 0), 1)).setText("Selected Files");
-            ((JLabel) getComponent(getComponent(toDisable.getParent(), 0), 1)).updateUI();
+            if(System.getProperty("os.name").toLowerCase().contains("windows")) {
+                filelister = (JComponent) ftpChooser.getComponent(2);
+                JComponent toDisable = (JComponent) getComponent(getComponent(filelister, 2), 2);
+                ((JLabel) getComponent(getComponent(toDisable.getParent(), 0), 1)).setText("Selected Files");
+                ((JLabel) getComponent(getComponent(toDisable.getParent(), 0), 1)).updateUI();
 
-            filenameField = new JTextField();
-            filenameField.addMouseListener(new BasicTextFieldListener(this));
-            filenameField.setSize(toDisable.getComponent(1).getSize());
-            filenameField.setFont(toDisable.getComponent(1).getFont());
-            Component filler1 = toDisable.getComponent(0);
-            Component filler2 = toDisable.getComponent(2);
-            Component dropdown = toDisable.getComponent(3);
-            toDisable.removeAll();
-            toDisable.add(filler1);
-            toDisable.add(filenameField);
-            toDisable.add(filler2);
-            toDisable.add(dropdown);
+                filenameField = new JTextField();
+                filenameField.addMouseListener(new BasicTextFieldListener(this));
+                filenameField.setSize(toDisable.getComponent(1).getSize());
+                filenameField.setFont(toDisable.getComponent(1).getFont());
+                Component filler1 = toDisable.getComponent(0);
+                Component filler2 = toDisable.getComponent(2);
+                Component dropdown = toDisable.getComponent(3);
+                toDisable.removeAll();
+                toDisable.add(filler1);
+                toDisable.add(filenameField);
+                toDisable.add(filler2);
+                toDisable.add(dropdown);
 
-            filelister.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
-            FileDisplay fileNameDisplay = new FileDisplay(ftpChooser, filenameField);
+                filelister.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
+                FileDisplay fileNameDisplay = new FileDisplay(ftpChooser, filenameField);
+
+            } else if(System.getProperty("os.name").toLowerCase().contains("linux")){
+                ftpChooser.getComponent(0).setVisible(false);
+                getComponent(ftpChooser.getComponent(1), 0).setVisible(false);
+                filelister = ftpChooser;
+            }
 
             //config ftpchooser
             ftpChooser.setMultiSelectionEnabled(true);
@@ -171,7 +179,7 @@ public class FTPFrame extends JFrame {
             this.setTitle(TITLE);
             this.setSize(800, 450);
             this.setLocationRelativeTo(null);
-            this.setBackground(Console.DefaultBackground);
+            this.setBackground(Color.WHITE);
 
             this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
             this.addWindowListener(new WindowAdapter() {
