@@ -7,11 +7,11 @@ import javax.swing.*;
 
 public class MenuBar extends JMenuBar {
 
-    public MenuBar(FTPFrame frame, Parser parser) {
+    public MenuBar(FTPFrame frame) {
         super();
 
         JMenu file = new JMenu("File");
-        file.add(new UploadFileOption(frame, parser));
+        file.add(new UploadFileOption(frame));
         file.add(new DeleteOption(frame));
         file.add(new LogoutOption(frame));
 

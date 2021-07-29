@@ -13,6 +13,8 @@ public class MasterQueue {
     private FTPFrame frame;
 
     public MasterQueue(FTPFrame frame) {
+        this.frame = frame;
+
         master = new Thread(this::run);
         master.start();
     }

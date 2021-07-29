@@ -138,7 +138,6 @@ public class FTPFrame extends JFrame {
             } catch (IOException e) {
                 printToConsoleln("Error: " + e.getMessage());
                 e.printStackTrace();
-                TimeUnit.SECONDS.sleep(3);
                 con.flushConsole();
                 isInit = true;
                 uninit();
@@ -193,7 +192,7 @@ public class FTPFrame extends JFrame {
             });
 
             //add Menubar
-            this.setJMenuBar(new MenuBar(this, parser));
+            this.setJMenuBar(new MenuBar(this));
 
             //droplistener
             dropField = new DropField();

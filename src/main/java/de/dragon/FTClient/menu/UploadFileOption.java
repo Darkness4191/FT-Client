@@ -14,10 +14,10 @@ public class UploadFileOption extends FMenuItem {
     private FTPFrame frame;
     private Parser parser;
 
-    public UploadFileOption(FTPFrame frame, Parser parser) {
+    public UploadFileOption(FTPFrame frame) {
         super();
         this.frame = frame;
-        this.parser = parser;
+        this.parser = frame.getParser();
         this.setText("Upload");
         this.addActionListener(this);
     }
