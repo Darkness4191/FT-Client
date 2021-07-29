@@ -15,7 +15,7 @@ public class EnableHiddenFilesOption extends JCheckBoxMenuItem implements Action
     public EnableHiddenFilesOption(FTPFrame frame) {
         super();
         this.frame = frame;
-        this.setText("Hidden files");
+        this.setText("Hidden Files");
         this.addActionListener(this);
     }
 

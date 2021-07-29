@@ -1,14 +1,14 @@
 package de.dragon.FTClient.menu;
 
-import de.dragon.FTClient.frame.FTPFrame;
 import de.dragon.FTClient.ftpnet.Download;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 public class AutoApproveDownloadOption extends JCheckBoxMenuItem implements ActionListener {
+
+    //TODO finish this
 
     public AutoApproveDownloadOption() {
         super();

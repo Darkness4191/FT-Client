@@ -23,7 +23,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 public class FTPFrame extends JFrame {
 
@@ -141,7 +140,7 @@ public class FTPFrame extends JFrame {
                 con.flushConsole();
                 isInit = true;
                 uninit();
-                throw e;
+                criticalError(e);
             }
 
             printToConsoleln("Building parser");

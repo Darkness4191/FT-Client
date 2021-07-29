@@ -1,7 +1,6 @@
 package de.dragon.FTClient.menu;
 
 import de.dragon.FTClient.frame.FTPFrame;
-import de.dragon.FTClient.ftpnet.Parser;
 
 import javax.swing.*;
 
@@ -15,15 +14,18 @@ public class MenuBar extends JMenuBar {
         file.add(new DeleteOption(frame));
         file.add(new LogoutOption(frame));
 
+        JMenu news = new JMenu("New");
+        news.add(new CreateFolderOption(frame));
+
         JMenu options = new JMenu("Options");
         options.add(new RefreshOption(frame));
-        options.add(new AutoApproveDownloadOption());
 
         JMenu view = new JMenu("View");
         view.add(new EnableHiddenFilesOption(frame));
 
         this.add(file);
         this.add(options);
+        this.add(news);
         this.add(view);
     }
 
