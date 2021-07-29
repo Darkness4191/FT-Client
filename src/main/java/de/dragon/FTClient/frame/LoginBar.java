@@ -30,6 +30,8 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
     private ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
     private ArrayBlockingQueue<String> q = new ArrayBlockingQueue<>(2);
 
+    private int statePassword;
+
     public LoginBar(FTPFrame parent) throws IOException {
         this.parent = parent;
         this.setBackground(Color.WHITE);
@@ -75,6 +77,13 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
             String host = json.getAsJsonObject().get("host").getAsString();
             String user = json.getAsJsonObject().get("user").getAsString();
 
+            //Check passwordstate
+            statePassword = json.getAsJsonObject().get("state").getAsInt();
+            if(statePassword == PasswordState.SAVED) {
+                listenerPassField.changeToNormal();
+                passwordField.setText(json.getAsJsonObject().get("pass").getAsString());
+            }
+
             hostField.setText(host);
             textField.setText(user);
         }
@@ -117,14 +126,27 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
 
     @Override
     public void run() {
+        Thread.currentThread().setName("Login");
         while(true) {
             try {
                 String s = q.take();
 
                 parent.printToConsoleln("Login information prepared");
-                LoginDetailsContainer container = new LoginDetailsContainer(hostField.getText(), textField.getText(), s);
+                LoginDetailsContainer container = new LoginDetailsContainer(hostField.getText(), textField.getText(), s, statePassword);
                 parent.initFileChooser(container);
-                container.setPass("");
+
+                if(statePassword == 0) {
+                    int ans = JOptionPane.showOptionDialog(parent, "Save password locally?", "Login", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"Yes", "No, don't ask me again", "No"}, "Yes");
+
+                    if(ans == JOptionPane.YES_OPTION) {
+                        container.setState(PasswordState.SAVED);
+                    } else if(ans == JOptionPane.NO_OPTION) {
+                        container.setState(PasswordState.DONT_ASK_AGAIN);
+                        container.setPass("");
+                    } else {
+                        container.setPass("");
+                    }
+                }
 
                 Gson gson = new Gson();
                 String jsons = gson.toJson(container);

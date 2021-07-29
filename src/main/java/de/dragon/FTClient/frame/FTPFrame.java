@@ -60,7 +60,7 @@ public class FTPFrame extends JFrame {
         con.getPane().setBackground(Console.DefaultBackground);
         con.getPane().setOpaque(true);
 
-        //menubar
+        //Init Menubar
         menu = new LoginBar(this);
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
         splitPane.setDividerLocation(23);
@@ -73,7 +73,7 @@ public class FTPFrame extends JFrame {
 
     public void initFileChooser(LoginDetailsContainer c) throws UnsupportedLookAndFeelException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, BadLocationException {
         try {
-            //init temp direc
+            //Init temp direc
             printToConsoleln("Initializing components...");
             if (ut.getTempFile("FTPClient", token).exists()) {
                 ut.deleteFileRec(ut.getTempFile("FTPClient", token));
@@ -93,7 +93,7 @@ public class FTPFrame extends JFrame {
 
             DebugPrinter.println(PATH_TO_TEMP);
 
-            //jfilechooser setup
+            //JFileChooser setup
             ftpChooser = new JFileChooser(PATH_TO_TEMP);
             if(System.getProperty("os.name").toLowerCase().contains("windows")) {
                 filelister = (JComponent) ftpChooser.getComponent(2);
@@ -125,14 +125,13 @@ public class FTPFrame extends JFrame {
                 filelister = ftpChooser;
             }
 
-            //config ftpchooser
+            //Config ftpchooser
             ftpChooser.setMultiSelectionEnabled(true);
             ftpChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             ftpChooser.setOpaque(false);
 
-            //login
+            //Login
             printToConsoleln("Connecting to server...");
-
             try {
                 connector = new Connector(c.getHost(), c.getUser(), c.getPass());
                 printToConsoleln("Connection attempt successful");
@@ -143,21 +142,20 @@ public class FTPFrame extends JFrame {
                 con.flushConsole();
                 isInit = true;
                 uninit();
-                return;
+                throw e;
             }
 
             printToConsoleln("Building parser");
             parser = new Parser(connector, this);
 
 
-            //droplistener
+            //Droplistener setup
             DropListener dropTarget = new DropListener(this);
             ftpChooser.addPropertyChangeListener(parser);
             ftpChooser.addActionListener(new MainListener(parser));
             filelister.setDropTarget(dropTarget);
             DebugPrinter.println(filelister.getClass().getName());
 
-            //update fileview
             printToConsoleln("Connection fully established");
             printToConsoleln("Refreshing...");
 
@@ -168,6 +166,7 @@ public class FTPFrame extends JFrame {
 
             isInit = true;
 
+            //Build JFrame
             buildFrame(splitPane);
             setTask(Task.download);
 

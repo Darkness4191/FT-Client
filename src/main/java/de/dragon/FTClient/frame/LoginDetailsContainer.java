@@ -5,11 +5,13 @@ public class LoginDetailsContainer {
     private String host;
     private String user;
     private String pass;
+    private int state;
 
-    public LoginDetailsContainer(String host, String user, String pass) {
+    public LoginDetailsContainer(String host, String user, String pass, int state) {
         this.host = host;
         this.user = user;
         this.pass = pass;
+        this.state = state;
     }
 
     public String getHost() {
@@ -22,6 +24,14 @@ public class LoginDetailsContainer {
 
     public String getPass() {
         return pass;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 
     public void setPass(String pass) {
