@@ -17,6 +17,7 @@ public class MenuBar extends JMenuBar {
 
         JMenu options = new JMenu("Options");
         options.add(new RefreshOption(frame));
+        options.add(new AutoApproveDownloadOption());
 
         JMenu view = new JMenu("View");
         view.add(new EnableHiddenFilesOption(frame));

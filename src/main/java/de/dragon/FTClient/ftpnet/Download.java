@@ -17,14 +17,14 @@ public class Download extends Packet {
     private FTPFrame frame;
     private Connector connector;
 
-    private static boolean always_approve = false;
+    public static boolean always_approve = false;
 
     public Download(Parser parser) {
         this.parser = parser;
         this.frame = parser.getFrame();
         this.connector = parser.getConnector();
 
-        File exi = new File(System.getProperty("user.home") + File.separator + "FTPDownloads" + File.separator + frame.token);
+        File exi = new File(System.getProperty("user.home") + File.separator + "Downloads");
         if (!exi.exists()) {
             exi.mkdirs();
         }
