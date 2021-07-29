@@ -78,7 +78,12 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
             String user = json.getAsJsonObject().get("user").getAsString();
 
             //Check passwordstate
-            statePassword = json.getAsJsonObject().get("state").getAsInt();
+            if(json.getAsJsonObject().get("state") != null) {
+                statePassword = json.getAsJsonObject().get("state").getAsInt();
+            } else {
+                statePassword = PasswordState.NOT_SAVED;
+            }
+
             if(statePassword == PasswordState.SAVED) {
                 listenerPassField.changeToNormal();
                 passwordField.setText(json.getAsJsonObject().get("pass").getAsString());
