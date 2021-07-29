@@ -26,7 +26,6 @@ public class ButtonUI extends BasicButtonUI implements java.io.Serializable, Mou
 
     public void installUI(JComponent c) {
         super.installUI(c);
-
         c.addMouseListener(this);
         c.addKeyListener(this);
     }

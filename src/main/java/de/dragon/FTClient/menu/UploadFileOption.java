@@ -1,7 +1,6 @@
 package de.dragon.FTClient.menu;
 
 import de.dragon.FTClient.frame.FTPFrame;
-import de.dragon.FTClient.ftpnet.Parser;
 import de.dragon.FTClient.ftpnet.Upload;
 
 import javax.swing.*;
@@ -12,12 +11,10 @@ import java.io.IOException;
 public class UploadFileOption extends FMenuItem {
 
     private FTPFrame frame;
-    private Parser parser;
 
     public UploadFileOption(FTPFrame frame) {
         super();
         this.frame = frame;
-        this.parser = frame.getParser();
         this.setText("Upload");
         this.addActionListener(this);
     }
@@ -33,15 +30,13 @@ public class UploadFileOption extends FMenuItem {
 
             if (r == JFileChooser.APPROVE_OPTION) {
                 try {
-                    Upload upload = new Upload(parser);
+                    Upload upload = new Upload(frame.getParser());
                     upload.addFiles(chooser.getSelectedFiles());
                     frame.getMasterQueue().send(upload);
                     frame.refreshView(false);
                 } catch (IOException interruptedException) {
                     interruptedException.printStackTrace();
                 }
-                JOptionPane.showMessageDialog(frame.getDropField(), String.format("Upload of %d files successful", chooser.getSelectedFiles().length), "Info", JOptionPane.INFORMATION_MESSAGE);
-
             }
 
         }
