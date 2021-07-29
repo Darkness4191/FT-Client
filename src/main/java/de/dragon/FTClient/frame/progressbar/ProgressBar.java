@@ -4,6 +4,7 @@ import de.dragon.FTClient.frame.FTPFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class ProgressBar extends JProgressBar {
 
@@ -23,19 +24,25 @@ public class ProgressBar extends JProgressBar {
     }
 
     public void init() {
-        if(!isInit) {
-            isInit = true;
-            this.setPreferredSize(new Dimension((int) parent.getSize().getWidth(), 20));
-            this.setStringPainted(true);
-            this.setString("");
-            this.setMaximum(max);
-            this.setBorder(BorderFactory.createLineBorder(new Color(177, 177, 177), 2));
-            this.setForeground(new Color(38, 220, 71));
-            this.setBackground(new Color(34, 128, 45));
-            this.setUI(new ProgressBarUI());
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                if(!isInit) {
+                    isInit = true;
+                    this.setPreferredSize(new Dimension((int) parent.getSize().getWidth(), 20));
+                    this.setStringPainted(true);
+                    this.setString("");
+                    this.setMaximum(max);
+                    this.setBorder(BorderFactory.createLineBorder(new Color(177, 177, 177), 2));
+                    this.setForeground(new Color(38, 220, 71));
+                    this.setBackground(new Color(34, 128, 45));
+                    this.setUI(new ProgressBarUI());
 
-            parent.add(this, BorderLayout.NORTH);
-            parent.revalidate();
+                    parent.add(this, BorderLayout.NORTH);
+                    parent.revalidate();
+                }
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
         }
     }
 

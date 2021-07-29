@@ -45,6 +45,7 @@ public class MasterQueue {
                 run.execute();
             }
         } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
             frame.criticalError(e);
         }
     }

@@ -140,7 +140,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
                 LoginDetailsContainer container = new LoginDetailsContainer(hostField.getText(), textField.getText(), s, statePassword);
                 parent.initFileChooser(container);
 
-                if(statePassword == 0) {
+                if(statePassword == PasswordState.NOT_SAVED) {
                     int ans = JOptionPane.showOptionDialog(parent, "Save password locally?", "Login", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"Yes", "No, don't ask me again", "No"}, "Yes");
 
                     if(ans == JOptionPane.YES_OPTION) {

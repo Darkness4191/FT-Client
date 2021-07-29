@@ -65,7 +65,7 @@ public class Download extends Packet {
     public boolean confirmDownload() throws IOException {
         if (!always_approve) {
             int a = JOptionPane.showOptionDialog(null,
-                    "Do you want to download that ressource from the server?",
+                    "Do you want to download the selected file(s) from the server?",
                     "Approve Download",
                     JOptionPane.YES_NO_CANCEL_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
@@ -77,12 +77,10 @@ public class Download extends Packet {
                 always_approve = true;
             }
 
-            if (a == JOptionPane.OK_OPTION || a == JOptionPane.NO_OPTION) {
-                return true;
-            } else
-                return false;
-        } else
+            return a == JOptionPane.OK_OPTION || a == JOptionPane.NO_OPTION;
+        } else {
             return true;
+        }
     }
 
     private void download(String pathOnServer, String downloadPath, boolean isDirectory, String filename, ProgressBar bar) throws IOException {
