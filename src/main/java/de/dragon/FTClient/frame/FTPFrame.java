@@ -282,6 +282,7 @@ public class FTPFrame extends JFrame {
     }
 
     public void criticalError(Exception e) {
+        e.printStackTrace();
         if(connector != null) {
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage() + "(" + connector.getClient().getReplyCode() + ")", "Error", JOptionPane.ERROR_MESSAGE);
             try {

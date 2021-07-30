@@ -39,19 +39,21 @@ public class Download extends Packet {
 
         ProgressBar progressBar = new ProgressBar(frame);
 
-        for (int i = 0; i < files.size(); i++) {
-            try {
-                if (!files.get(i).getName().equals("^^^") && confirmDownload()) {
-                    progressBar.init();
-                    download(parser.getPathToFileOnServer(files.get(i).getName()), download_dir, files.get(i).isDirectory(), files.get(i).getName(), progressBar);
-                    passed++;
-                } else {
-                    failed++;
+        if(confirmDownload()) {
+            for (int i = 0; i < files.size(); i++) {
+                try {
+                    if (!files.get(i).getName().equals("^^^")) {
+                        progressBar.init();
+                        download(parser.getPathToFileOnServer(files.get(i).getName()), download_dir, files.get(i).isDirectory(), files.get(i).getName(), progressBar);
+                        passed++;
+                    } else {
+                        failed++;
+                    }
+                } catch (IOException ioException) {
+                    frame.criticalError(ioException);
+                    ioException.printStackTrace();
+                    break;
                 }
-            } catch (IOException ioException) {
-                frame.criticalError(ioException);
-                ioException.printStackTrace();
-                break;
             }
         }
 
@@ -92,9 +94,9 @@ public class Download extends Packet {
         } else {
             bar.setString(filename);
             FileOutputStream download = new FileOutputStream(new File(downloadPath + File.separator + filename));
-            InputStream in = connector.getClient().retrieveFileStream(pathOnServer);
-
             long filesize = Long.parseLong(connector.getClient().getSize(pathOnServer));
+
+            InputStream in = connector.getClient().retrieveFileStream(pathOnServer);
             byte[] buffer = new byte[16 * 1024];
             int am;
             int rounds = 0;
@@ -104,6 +106,8 @@ public class Download extends Packet {
                 download.flush();
                 rounds++;
             }
+
+            bar.updatePercent(1);
             download.close();
             in.close();
             connector.getClient().completePendingCommand();
