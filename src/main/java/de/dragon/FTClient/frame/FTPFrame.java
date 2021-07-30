@@ -139,7 +139,6 @@ public class FTPFrame extends JFrame {
                 e.printStackTrace();
                 con.flushConsole();
                 isInit = true;
-                uninit();
                 criticalError(e);
             }
 
@@ -283,7 +282,7 @@ public class FTPFrame extends JFrame {
     }
 
     public void criticalError(Exception e) {
-        if(isInit) {
+        if(connector != null) {
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage() + "(" + connector.getClient().getReplyCode() + ")", "Error", JOptionPane.ERROR_MESSAGE);
             try {
                 connector.reconnect();
