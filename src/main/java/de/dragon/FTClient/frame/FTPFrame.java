@@ -8,6 +8,8 @@ import de.dragon.FTClient.listeners.DropListener;
 import de.dragon.FTClient.listeners.FileDisplay;
 import de.dragon.FTClient.listeners.MainListener;
 import de.dragon.FTClient.menu.MenuBar;
+import de.dragon.FTClient.menu.popup.FPopupMenu;
+import de.dragon.FTClient.menu.popup.SwingUtils;
 import de.dragon.UsefulThings.console.Console;
 import de.dragon.UsefulThings.dir.DeleteOnExitReqCall;
 import de.dragon.UsefulThings.misc.DebugPrinter;
@@ -113,9 +115,9 @@ public class FTPFrame extends JFrame {
                 toDisable.add(filler2);
                 toDisable.add(dropdown);
 
-                JPopupMenu popup = filelister.getComponentPopupMenu();
-                popup.removeAll();
-
+                JList list = SwingUtils.getDescendantOfType(JList.class, ftpChooser, "Enabled", true);
+                JPopupMenu popup = list.getComponentPopupMenu();
+                list.setComponentPopupMenu(new FPopupMenu(this));
 
                 filelister.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
                 FileDisplay fileNameDisplay = new FileDisplay(ftpChooser, filenameField);

@@ -66,14 +66,7 @@ public class Download extends Packet {
 
     public boolean confirmDownload() throws IOException {
         if (!always_approve) {
-            int a = JOptionPane.showOptionDialog(null,
-                    "Do you want to download the selected file(s) from the server?",
-                    "Approve Download",
-                    JOptionPane.YES_NO_CANCEL_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,     //do not use a custom Icon
-                    new Object[]{"Yes", "Yes, don't ask me again", "No"},  //the titles of buttons
-                    "Yes");
+            int a = JOptionPane.showOptionDialog(null, "Do you want to download the selected file(s) from the server?", "Approve Download", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"Yes", "Yes, don't ask me again", "No"},  "Yes");
 
             if (a == JOptionPane.NO_OPTION) {
                 always_approve = true;
