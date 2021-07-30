@@ -113,6 +113,10 @@ public class FTPFrame extends JFrame {
                 toDisable.add(filler2);
                 toDisable.add(dropdown);
 
+                JPopupMenu popup = filelister.getComponentPopupMenu();
+                popup.removeAll();
+
+
                 filelister.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
                 FileDisplay fileNameDisplay = new FileDisplay(ftpChooser, filenameField);
 
