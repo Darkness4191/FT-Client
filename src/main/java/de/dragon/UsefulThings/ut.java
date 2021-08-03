@@ -30,7 +30,7 @@ public class ut {
             new File(path + separator + folder).mkdir();
         }
 
-        String s = "";
+        StringBuilder s = new StringBuilder();
 
         if(Files.exists(Paths.get(path + separator + folder + separator + filename + ".save"))) {
             try {
@@ -40,7 +40,7 @@ public class ut {
                     if(i == -1) {
                         break;
                     } else {
-                        s += (char) i;
+                        s.append((char) i);
                     }
                 }
                 reader.close();
@@ -49,7 +49,7 @@ public class ut {
             }
         }
 
-        return s;
+        return s.toString();
 	}
 
 	public static void saveInfoToAppdata(String folder, String filename, String data) throws IOException {
@@ -144,10 +144,10 @@ public class ut {
 	}
 
 	public static String merge(String[] array, String seperator) {
-		String merge = "";
+		StringBuilder merge = new StringBuilder();
 		for(String s : array) {
-			merge += merge.equals("") ? s : seperator + s;
+			merge.append(merge.toString().equals("") ? s : seperator + s);
 		}
-		return merge;
+		return merge.toString();
 	}
 }
