@@ -14,6 +14,7 @@ import de.dragon.UsefulThings.dir.DeleteOnExitReqCall;
 import de.dragon.UsefulThings.misc.DebugPrinter;
 import de.dragon.UsefulThings.misc.Token;
 import de.dragon.UsefulThings.ut;
+import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPSClient;
 
 import javax.swing.*;
@@ -142,15 +143,18 @@ public class FTPFrame extends JFrame {
                 printToConsoleln("Connection attempt successful");
             } catch (IOException e) {
                 printToConsoleln("Error: " + e.getMessage());
-                e.printStackTrace();
                 con.setText("");
                 isInit = true;
-                criticalError(e);
+                if(!e.getMessage().equals("Planned Exception")) {
+                    criticalError(e);
+                } else {
+                    uninit();
+                }
+                return;
             }
 
             printToConsoleln("Building parser");
             parser = new Parser(connector, this);
-
 
             //Droplistener setup
             DropListener dropTarget = new DropListener(this);
@@ -304,7 +308,7 @@ public class FTPFrame extends JFrame {
         }
     }
 
-    public FTPSClient getClient() {
+    public FTPClient getClient() {
         return connector.getClient();
     }
 
