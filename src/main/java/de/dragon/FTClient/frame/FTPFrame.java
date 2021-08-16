@@ -10,19 +10,16 @@ import de.dragon.FTClient.listeners.MainListener;
 import de.dragon.FTClient.menu.MenuBar;
 import de.dragon.FTClient.menu.popup.FPopupMenu;
 import de.dragon.FTClient.menu.popup.SwingUtils;
-import de.dragon.UsefulThings.console.Console;
 import de.dragon.UsefulThings.dir.DeleteOnExitReqCall;
 import de.dragon.UsefulThings.misc.DebugPrinter;
-import de.dragon.UsefulThings.net.Token;
+import de.dragon.UsefulThings.misc.Token;
 import de.dragon.UsefulThings.ut;
-import org.apache.commons.net.ftp.FTPSClient;
+import org.apache.commons.net.ftp.FTPClient;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 
@@ -44,26 +41,35 @@ public class FTPFrame extends JFrame {
     private DropField dropField;
     private JTextField filenameField;
 
-    private Console con;
+    private JTextPane con;
 
     private JComponent lastPainted;
     private Task task;
     private boolean isInit = false;
 
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            DeleteOnExitReqCall.collectTrash();
+            if (isInit) {
+                new File(PATH_TO_TEMP).delete();
+                connector.logout();
+            }
+        }));
+
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         UIManager.put("FileChooser.readOnly", Boolean.TRUE);
 
         masterQueue = new MasterQueue(this);
 
-        con = new Console(false);
+        con = new JTextPane();
         con.setEditable(false);
-        con.getPane().setBackground(Console.DefaultBackground);
-        con.getPane().setOpaque(true);
+        con.setBackground(Color.decode("#202225"));
+        con.setOpaque(true);
+        con.setAutoscrolls(true);
 
         //Init Menubar
         menu = new LoginBar(this);
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con);
         splitPane.setDividerLocation(23);
         splitPane.setDividerSize(0);
         splitPane.setBackground(Color.WHITE);
@@ -142,15 +148,18 @@ public class FTPFrame extends JFrame {
                 printToConsoleln("Connection attempt successful");
             } catch (IOException e) {
                 printToConsoleln("Error: " + e.getMessage());
-                e.printStackTrace();
-                con.flushConsole();
+                con.setText("");
                 isInit = true;
-                criticalError(e);
+                if(!e.getMessage().equals("Planned exception due to user input")) {
+                    criticalError(e);
+                } else {
+                    uninit();
+                }
+                return;
             }
 
             printToConsoleln("Building parser");
             parser = new Parser(connector, this);
-
 
             //Droplistener setup
             DropListener dropTarget = new DropListener(this);
@@ -187,13 +196,7 @@ public class FTPFrame extends JFrame {
             this.setLocationRelativeTo(null);
             this.setBackground(Color.WHITE);
 
-            this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            this.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    collectTrashandExit();
-                }
-            });
+            this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             //add Menubar
             this.setJMenuBar(new MenuBar(this));
@@ -214,21 +217,6 @@ public class FTPFrame extends JFrame {
         this.revalidate();
     }
 
-    public void collectTrashandExit() {
-        try {
-            DeleteOnExitReqCall.collectTrash();
-            if (isInit) {
-                new File(PATH_TO_TEMP).delete();
-                connector.logout();
-            }
-
-            System.exit(0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
-
     public void uninit() {
         if (connector != null) {
             try {
@@ -247,14 +235,14 @@ public class FTPFrame extends JFrame {
         PATH_TO_TEMP = null;
         token = null;
 
-        con.flushConsole();
+        con.setText("");
 
         System.gc();
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con.getPane());
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, menu, con);
         splitPane.setDividerLocation(23);
         splitPane.setDividerSize(0);
-        splitPane.setBackground(Console.DefaultBackground);
+        splitPane.setBackground(Color.decode("#202225"));
 
         buildFrame(splitPane);
         isInit = false;
@@ -262,7 +250,7 @@ public class FTPFrame extends JFrame {
 
     public void printToConsoleln(String s) {
         try {
-            con.getPane().getDocument().insertString(con.getPane().getDocument().getLength(), s + "\n", null);
+            con.getDocument().insertString(con.getDocument().getLength(), s + "\n", null);
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
@@ -304,7 +292,7 @@ public class FTPFrame extends JFrame {
         }
     }
 
-    public FTPSClient getClient() {
+    public FTPClient getClient() {
         return connector.getClient();
     }
 

@@ -1,6 +1,5 @@
 package de.dragon.FTClient.ftpnet;
 
-import de.dragon.FTClient.frame.FTPFrame;
 import de.dragon.FTClient.frame.progressbar.ProgressBar;
 import org.apache.commons.net.ftp.FTPFile;
 
@@ -9,20 +8,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Download extends Packet {
+public class Download extends Packet implements PipeStream {
 
     private Parser parser;
     private String download_dir;
-    private FTPFrame frame;
-    private Connector connector;
 
     public static boolean always_approve = false;
 
+    private ArrayList<String> failed = new ArrayList<>();
+    private int passed = 0;
+
     public Download(Parser parser) {
         this.parser = parser;
-        this.frame = parser.getFrame();
-        this.connector = parser.getConnector();
 
         File exi = new File(System.getProperty("user.home") + File.separator + "Downloads");
         if (!exi.exists()) {
@@ -34,40 +34,58 @@ public class Download extends Packet {
 
     @Override
     public void execute() throws IOException {
-        int passed = 0;
-        int failed = 0;
+        ProgressBar progressBar = new ProgressBar(parser.getFrame());
+        failed.clear();
+        passed = 0;
 
-        ProgressBar progressBar = new ProgressBar(frame);
-
-        if(confirmDownload()) {
+        if (confirmDownload()) {
             for (int i = 0; i < files.size(); i++) {
-                try {
-                    if (!files.get(i).getName().equals("^^^")) {
-                        progressBar.init();
-                        download(parser.getPathToFileOnServer(files.get(i).getName()), download_dir, files.get(i).isDirectory(), files.get(i).getName(), progressBar);
-                        passed++;
-                    } else {
-                        failed++;
-                    }
-                } catch (IOException ioException) {
-                    frame.criticalError(ioException);
-                    ioException.printStackTrace();
-                    break;
+                if (!files.get(i).getName().equals("^^^")) {
+                    progressBar.init();
+                    download(parser.getPathToFileOnServer(files.get(i).getName()), download_dir, files.get(i).isDirectory(), files.get(i).getName(), progressBar);
                 }
             }
         }
 
-        if (passed > 0) {
-            JOptionPane.showMessageDialog(frame.getDropField(), String.format("Successful: %d, Failed: %d. Saved file to %s", passed, failed, download_dir), "Info", JOptionPane.INFORMATION_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(parser.getFrame().getDropField(),
+                String.format("Successful: %d, Failed: %d. Saved file to %s%nFailed: " + merge(failed, "%nFailed: "), passed, failed.size(), download_dir),
+                "Info", JOptionPane.INFORMATION_MESSAGE);
         progressBar.dispose();
+
         parser.refreshView(false);
     }
 
-    public boolean confirmDownload() throws IOException {
-        if (!always_approve) {
-            int a = JOptionPane.showOptionDialog(null, "Do you want to download the selected file(s) from the server?", "Approve Download", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"Yes", "Yes, don't ask me again", "No"},  "Yes");
+    private void download(String pathOnServer, String downloadPath, boolean isDirectory, String filename, ProgressBar bar) throws IOException {
+        if (isDirectory) {
+            new File(downloadPath + File.separator + filename).mkdir();
+            for (FTPFile file : parser.getConnector().getClient().listFiles(pathOnServer)) {
+                download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName(), bar);
+            }
+        } else {
+            try {
+                bar.setString(filename);
+                FileOutputStream download = new FileOutputStream(new File(downloadPath + File.separator + filename));
+                long filesize = Long.parseLong(parser.getConnector().getClient().getSize(pathOnServer));
 
+                InputStream in = parser.getConnector().getClient().retrieveFileStream(pathOnServer);
+                pipe(in, download, bar, filesize);
+
+                bar.updatePercent(1);
+                download.close();
+                in.close();
+
+                parser.getConnector().getClient().completePendingCommand();
+                passed++;
+            } catch (Exception e) {
+                failed.add(filename);
+                parser.getConnector().getClient().completePendingCommand();
+            }
+        }
+    }
+
+    private boolean confirmDownload() throws IOException {
+        if (!always_approve) {
+            int a = JOptionPane.showOptionDialog(null, "Do you want to download the selected file(s) from the server?", "Approve Download", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"Yes", "Yes, don't ask me again", "No"}, "Yes");
             if (a == JOptionPane.NO_OPTION) {
                 always_approve = true;
             }
@@ -78,32 +96,13 @@ public class Download extends Packet {
         }
     }
 
-    private void download(String pathOnServer, String downloadPath, boolean isDirectory, String filename, ProgressBar bar) throws IOException {
-        if (isDirectory) {
-            new File(downloadPath + File.separator + filename).mkdir();
-            for (FTPFile file : connector.getClient().listFiles(pathOnServer)) {
-                download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName(), bar);
-            }
-        } else {
-            bar.setString(filename);
-            FileOutputStream download = new FileOutputStream(new File(downloadPath + File.separator + filename));
-            long filesize = Long.parseLong(connector.getClient().getSize(pathOnServer));
+    private String merge(List<? extends String> list, String mergeChar) {
+        StringBuilder builder = new StringBuilder();
 
-            InputStream in = connector.getClient().retrieveFileStream(pathOnServer);
-            byte[] buffer = new byte[16 * 1024];
-            int am;
-            int rounds = 0;
-            while ((am = in.read(buffer)) > 0) {
-                bar.updatePercent((rounds * buffer.length * 1D + am) / filesize);
-                download.write(buffer, 0, am);
-                download.flush();
-                rounds++;
-            }
-
-            bar.updatePercent(1);
-            download.close();
-            in.close();
-            connector.getClient().completePendingCommand();
+        for(String s : list) {
+            builder.append(s).append(mergeChar);
         }
+
+        return builder.toString().substring(0, builder.length() - 2);
     }
 }

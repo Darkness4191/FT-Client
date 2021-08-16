@@ -38,7 +38,7 @@ public class MainListener implements ActionListener {
             parser.getFrame().getFtpChooser().setSelectedFile(new File(""));
             parser.getFrame().getFtpChooser().setSelectedFiles(new File[]{new File("")});
         } else if (e.getActionCommand().equals(JFileChooser.CANCEL_SELECTION)) {
-            parser.getFrame().collectTrashandExit();
+            System.exit(0);
         }
     }
 }

@@ -13,8 +13,10 @@ import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -68,7 +70,14 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
         loginButton.setForeground(UIManager.getColor("TextField.foreground"));
 
         if(ut.getTempFile("FTPClient", "login_details.save").exists()) {
-            JsonElement json = new JsonParser().parse(new FileReader(ut.getTempFile("FTPClient", "login_details.save")));
+            byte[] read = new FileInputStream(ut.getTempFile("FTPClient", "login_details.save")).readAllBytes();
+
+            JsonElement json;
+            try {
+                json = new JsonParser().parse(new String(Base64.getDecoder().decode(read)));
+            } catch(IllegalArgumentException e) {
+                json = new JsonParser().parse(new String(read));
+            }
 
             listenerHostField.changeToNormal();
             listenerTextField.changeToNormal();
@@ -77,7 +86,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
             String host = json.getAsJsonObject().get("host").getAsString();
             String user = json.getAsJsonObject().get("user").getAsString();
 
-            //Check passwordstate
+            //Check password state
             if(json.getAsJsonObject().get("state") != null) {
                 statePassword = json.getAsJsonObject().get("state").getAsInt();
             } else {
@@ -155,7 +164,7 @@ public class LoginBar extends JPanel implements ActionListener, Runnable {
 
                 Gson gson = new Gson();
                 String jsons = gson.toJson(container);
-                ut.saveInfoToAppdata("FTPClient", "login_details", jsons);
+                ut.saveInfoToAppdata("FTPClient", "login_details", new String(Base64.getEncoder().encode(jsons.getBytes(StandardCharsets.UTF_8))));
                 q.clear();
             } catch (UnsupportedLookAndFeelException | IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InterruptedException | BadLocationException unsupportedLookAndFeelException) {
                 parent.uninit();
