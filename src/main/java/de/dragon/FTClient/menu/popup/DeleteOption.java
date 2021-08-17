@@ -15,7 +15,6 @@ public class DeleteOption extends FMenuItem {
         super();
         this.frame = frame;
         this.setText("Delete");
-        this.addActionListener(this);
     }
 
     @Override

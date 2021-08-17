@@ -7,6 +7,8 @@ public abstract class FMenuItem extends JMenuItem implements ActionListener {
 
     public FMenuItem() {
         super();
+
+        this.addActionListener(this);
     }
 
 }

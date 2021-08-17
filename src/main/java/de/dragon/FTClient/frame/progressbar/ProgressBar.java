@@ -10,12 +10,12 @@ public class ProgressBar extends JProgressBar {
 
     private int max = 500;
 
-    private FTPFrame parent;
+    private FTPFrame frame;
     private boolean isInit = false;
 
     public ProgressBar(FTPFrame frame) {
         super();
-        this.parent = frame;
+        this.frame = frame;
     }
 
     public ProgressBar(FTPFrame frame, int max) {
@@ -28,7 +28,8 @@ public class ProgressBar extends JProgressBar {
             SwingUtilities.invokeAndWait(() -> {
                 if(!isInit) {
                     isInit = true;
-                    this.setPreferredSize(new Dimension((int) parent.getSize().getWidth(), 20));
+                    this.setComponentPopupMenu(new CancelPacketMenu(frame.getMasterQueue()));
+                    this.setPreferredSize(new Dimension((int) frame.getSize().getWidth(), 20));
                     this.setStringPainted(true);
                     this.setString("");
                     this.setMaximum(max);
@@ -37,8 +38,8 @@ public class ProgressBar extends JProgressBar {
                     this.setBackground(new Color(34, 128, 45));
                     this.setUI(new ProgressBarUI());
 
-                    parent.add(this, BorderLayout.NORTH);
-                    parent.revalidate();
+                    frame.add(this, BorderLayout.NORTH);
+                    frame.revalidate();
                 }
             });
         } catch (InterruptedException | InvocationTargetException e) {
@@ -64,8 +65,7 @@ public class ProgressBar extends JProgressBar {
     }
 
     public void dispose() {
-        parent.remove(this);
-        parent.getFilelister().setEnabled(true);
-        parent.revalidate();
+        frame.remove(this);
+        frame.revalidate();
     }
 }

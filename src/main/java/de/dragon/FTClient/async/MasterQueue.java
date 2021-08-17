@@ -11,6 +11,7 @@ public class MasterQueue {
     private ArrayBlockingQueue<Event> events = new ArrayBlockingQueue<Event>(5000);
     public Thread master;
     private FTPFrame frame;
+    private Packet current;
 
     public MasterQueue(FTPFrame frame) {
         this.frame = frame;
@@ -24,7 +25,8 @@ public class MasterQueue {
         while (true) {
             try {
                 Event event = events.take();
-                event.getRunnable().execute();
+                current = event.getRunnable();
+                current.execute();
                 synchronized (event.getThread()) {
                     event.getThread().notify();
                 }
@@ -56,6 +58,10 @@ public class MasterQueue {
 
     public void clearList() {
         events.clear();
+    }
+
+    public void cancelCurrentPacket() {
+        current.setCanceled(true);
     }
 
 }

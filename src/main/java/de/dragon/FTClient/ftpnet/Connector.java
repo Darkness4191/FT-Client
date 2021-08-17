@@ -1,17 +1,17 @@
 package de.dragon.FTClient.ftpnet;
 
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPConnectionClosedException;
-import org.apache.commons.net.ftp.FTPReply;
-import org.apache.commons.net.ftp.FTPSClient;
+import org.apache.commons.net.ftp.*;
 
 import javax.net.ssl.SSLException;
 import javax.swing.*;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class Connector {
 
     private FTPClient client;
+
+    private Thread noop;
 
     String user;
     String host;
@@ -21,6 +21,17 @@ public class Connector {
         this.host = host;
         this.user = user;
         connect(host, user, pass);
+
+        noop = new Thread(() -> {
+            while(client.isConnected()) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                    client.sendNoOp();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void connect(String host, String user, String pass) throws IOException {
@@ -41,19 +52,17 @@ public class Connector {
             client.connect(host);
         }
 
-        client.setFileType(FTPClient.BINARY_FILE_TYPE);
+        client.setFileType(FTP.BINARY_FILE_TYPE);
+        client.setFileTransferMode(FTPClient.STREAM_TRANSFER_MODE);
+        client.setTcpNoDelay(true);
         client.enterLocalPassiveMode();
         client.login(user, pass);
-        client.setStrictMultilineParsing(true);
 
         if (!FTPReply.isPositiveCompletion(client.getReplyCode())) {
             client.disconnect();
             throw new FTPConnectionClosedException(String.format("Server Refused connection (%s)", client.getReplyCode()));
         }
 
-        client.setControlKeepAliveTimeout(300);
-        client.setKeepAlive(true);
-        client.sendNoOp();
         client.setListHiddenFiles(false);
     }
 

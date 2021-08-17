@@ -56,29 +56,31 @@ public class Download extends Packet implements PipeStream {
     }
 
     private void download(String pathOnServer, String downloadPath, boolean isDirectory, String filename, ProgressBar bar) throws IOException {
-        if (isDirectory) {
-            new File(downloadPath + File.separator + filename).mkdir();
-            for (FTPFile file : parser.getConnector().getClient().listFiles(pathOnServer)) {
-                download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName(), bar);
-            }
-        } else {
-            try {
-                bar.setString(filename);
-                FileOutputStream download = new FileOutputStream(new File(downloadPath + File.separator + filename));
-                long filesize = Long.parseLong(parser.getConnector().getClient().getSize(pathOnServer));
+        if(!canceled) {
+            if (isDirectory) {
+                new File(downloadPath + File.separator + filename).mkdir();
+                for (FTPFile file : parser.getConnector().getClient().listFiles(pathOnServer)) {
+                    download(pathOnServer + "/" + file.getName(), downloadPath + File.separator + filename, file.isDirectory(), file.getName(), bar);
+                }
+            } else {
+                try {
+                    bar.setString(filename);
+                    FileOutputStream download = new FileOutputStream(new File(downloadPath + File.separator + filename));
+                    long filesize = Long.parseLong(parser.getConnector().getClient().getSize(pathOnServer));
 
-                InputStream in = parser.getConnector().getClient().retrieveFileStream(pathOnServer);
-                pipe(in, download, bar, filesize);
+                    InputStream in = parser.getConnector().getClient().retrieveFileStream(pathOnServer);
+                    pipe(in, download, bar, filesize);
 
-                bar.updatePercent(1);
-                download.close();
-                in.close();
+                    bar.updatePercent(1);
+                    download.close();
+                    in.close();
 
-                parser.getConnector().getClient().completePendingCommand();
-                passed++;
-            } catch (Exception e) {
-                failed.add(filename);
-                parser.getConnector().getClient().completePendingCommand();
+                    parser.getConnector().getClient().completePendingCommand();
+                    passed++;
+                } catch (Exception e) {
+                    failed.add(filename);
+                    parser.getConnector().getClient().completePendingCommand();
+                }
             }
         }
     }

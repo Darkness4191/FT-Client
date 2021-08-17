@@ -27,9 +27,12 @@ public class Delete extends Packet {
         for (int i = 0; i < files.size(); i++) {
             bar.updatePercent(i * 1D / files.size(), files.get(i).getName());
             try {
+                parser.getConnector().getClient().setListHiddenFiles(true);
                 deleted += delete(parser.getPathToFileOnServer(files.get(i).getName()), files.get(i).getName(), files.get(i).isDirectory());
             } catch (IOException e) {
                 frame.criticalError(e);
+            } finally {
+                parser.getConnector().getClient().setListHiddenFiles(false);
             }
         }
 
@@ -39,16 +42,20 @@ public class Delete extends Packet {
     }
 
     private int delete(String pathOnServer, String filename, boolean isDirectory) throws IOException {
-        if (isDirectory) {
-            int sum = 0;
-            for (FTPFile file : parser.getConnector().getClient().listFiles(pathOnServer)) {
-                sum += delete(pathOnServer + "/" + file.getName(), file.getName(), file.isDirectory());
+        if(!filename.equals("..") && !filename.equals(".")) {
+            if (isDirectory) {
+                int sum = 0;
+                for (FTPFile file : parser.getConnector().getClient().listFiles(pathOnServer)) {
+                    sum += delete(pathOnServer + "/" + file.getName(), file.getName(), file.isDirectory());
+                }
+                parser.getConnector().getClient().removeDirectory(pathOnServer);
+                return sum + 1;
+            } else {
+                parser.getConnector().getClient().deleteFile(pathOnServer);
+                return 1;
             }
-            parser.getConnector().getClient().removeDirectory(pathOnServer);
-            return sum + 1;
         } else {
-            parser.getConnector().getClient().deleteFile(pathOnServer);
-            return 1;
+            return 0;
         }
     }
 }

@@ -16,6 +16,8 @@ public class Upload extends Packet implements PipeStream {
     private Parser parser;
 
     private ArrayList<File> failed = new ArrayList<>();
+    private int count = 0;
+    private int total = 0;
 
     public Upload(Parser parser) {
         this.connector = parser.getConnector();
@@ -23,10 +25,8 @@ public class Upload extends Packet implements PipeStream {
     }
 
     @Override
-    public void execute() throws IOException, InterruptedException {
+    public void execute() {
         failed.clear();
-
-        int total = 0;
         for (File f : files) {
             total += getFileCount(f);
         }
@@ -35,13 +35,28 @@ public class Upload extends Packet implements PipeStream {
             ProgressBar bar = new ProgressBar(parser.getFrame());
             bar.init();
 
-            uploadToPath(f, parser.getPathToFileOnServer(f.getName()), bar);
+            try {
+                uploadToPath(f, parser.getPathToFileOnServer(f.getName()), bar);
+                parser.refreshView(false);
+            } catch (Exception e) {
+                try {
+                    System.out.println(parser.getConnector().getClient().getReply());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                e.printStackTrace();
+            } finally {
+                String pre = String.format("Upload complete: Successful: %d, Failed: %d", count - failed.size(), failed.size() + total - count);
 
-            JOptionPane.showMessageDialog(parser.getFrame().getDropField(),
-                    String.format("Upload complete: Successful: %d, Failed: %d%nFailed: " + merge(failed, "%nFailed: "), total - failed.size(), failed.size()),
-                    "Info", JOptionPane.INFORMATION_MESSAGE);
-            bar.dispose();
-            parser.refreshView(false);
+                if(failed.size() > 20) {
+                    failed.removeAll(failed.subList(20, failed.size() - 1));
+                }
+
+                JOptionPane.showMessageDialog(parser.getFrame().getDropField(),
+                        pre + (failed.size() > 0 ? "\nFailed: " : "") + merge(failed, "\nFailed: ") + (failed.size() > 20 ? "\n..." : ""),
+                        "Info", JOptionPane.INFORMATION_MESSAGE);
+                bar.dispose();
+            }
         }
     }
 
@@ -57,25 +72,29 @@ public class Upload extends Packet implements PipeStream {
         }
     }
 
-    private void uploadToPath(File f, String pathOnServer, ProgressBar progressBar) throws InterruptedException, IOException {
-        if (f.isDirectory()) {
-            connector.getClient().makeDirectory(pathOnServer);
-            for (File c : f.listFiles()) {
-                uploadToPath(c, pathOnServer + "/" + c.getName(), progressBar);
-            }
-        } else {
-            try {
-                progressBar.updateString(f.getName());
-                FileInputStream inputStream = new FileInputStream(f);
-                OutputStream out = connector.getClient().storeFileStream(pathOnServer);
-                long filesize = f.length();
-                pipe(inputStream, out, progressBar, filesize);
+    private void uploadToPath(File f, String pathOnServer, ProgressBar progressBar) throws IOException {
+        if(!canceled) {
+            if (f.isDirectory()) {
+                connector.getClient().makeDirectory(pathOnServer);
+                for (File c : f.listFiles()) {
+                    uploadToPath(c, pathOnServer + "/" + c.getName(), progressBar);
+                }
+            } else {
+                try {
+                    progressBar.updateString(f.getName() + String.format(" (%d/%d)", count + 1, total));
+                    FileInputStream inputStream = new FileInputStream(f);
+                    OutputStream out = connector.getClient().storeFileStream(pathOnServer);
+                    long filesize = f.length();
+                    pipe(inputStream, out, progressBar, filesize);
 
-                out.close();
-                connector.getClient().completePendingCommand();
-                inputStream.close();
-            } catch (Exception e) {
-                failed.add(f);
+                    out.close();
+                    connector.getClient().completePendingCommand();
+                    inputStream.close();
+                } catch (Exception e) {
+                    failed.add(f);
+                } finally {
+                    count++;
+                }
             }
         }
     }
@@ -87,6 +106,6 @@ public class Upload extends Packet implements PipeStream {
             builder.append(s.getAbsolutePath()).append(mergeChar);
         }
 
-        return builder.toString().substring(0, builder.length() - 2);
+        return builder.toString().substring(0, builder.length() != 0 ? builder.length() - mergeChar.length() : 0);
     }
 }

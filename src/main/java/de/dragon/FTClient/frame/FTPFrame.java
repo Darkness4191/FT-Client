@@ -50,10 +50,12 @@ public class FTPFrame extends JFrame {
     public FTPFrame() throws IOException, ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             DeleteOnExitReqCall.collectTrash();
-            if (isInit) {
-                new File(PATH_TO_TEMP).delete();
-                connector.logout();
-            }
+            new File(PATH_TO_TEMP).delete();
+            try {
+                if (isInit) {
+                    connector.logout();
+                }
+            } catch (Exception e) {}
         }));
 
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -64,6 +66,8 @@ public class FTPFrame extends JFrame {
         con = new JTextPane();
         con.setEditable(false);
         con.setBackground(Color.decode("#202225"));
+        con.setForeground(Color.WHITE);
+        con.setFont(con.getFont().deriveFont(12f));
         con.setOpaque(true);
         con.setAutoscrolls(true);
 
@@ -280,6 +284,7 @@ public class FTPFrame extends JFrame {
         if(connector != null) {
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage() + "(" + connector.getClient().getReplyCode() + ")", "Error", JOptionPane.ERROR_MESSAGE);
             try {
+                System.out.println(connector.getClient().getReply());
                 connector.reconnect();
             } catch (IOException ioException) {
                 uninit();
