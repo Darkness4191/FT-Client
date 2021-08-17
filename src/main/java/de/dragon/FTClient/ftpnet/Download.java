@@ -81,10 +81,10 @@ public class Download extends Packet implements PipeStream {
                     download.close();
                     in.close();
 
-                    parser.getConnector().getClient().completePendingCommand();
                     passed++;
                 } catch (Exception e) {
                     failed.add(filename);
+                } finally {
                     parser.getConnector().getClient().completePendingCommand();
                 }
             }

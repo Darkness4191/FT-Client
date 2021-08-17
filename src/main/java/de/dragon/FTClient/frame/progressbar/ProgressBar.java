@@ -29,7 +29,7 @@ public class ProgressBar extends JProgressBar {
                 if(!isInit) {
                     isInit = true;
                     this.setComponentPopupMenu(new CancelPacketMenu(frame.getMasterQueue()));
-                    this.setPreferredSize(new Dimension((int) frame.getSize().getWidth(), 20));
+                    this.setPreferredSize(new Dimension((int) frame.getSize().getWidth(), 19));
                     this.setStringPainted(true);
                     this.setString("");
                     this.setMaximum(max);
