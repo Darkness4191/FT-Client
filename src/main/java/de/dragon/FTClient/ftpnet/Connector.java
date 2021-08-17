@@ -25,7 +25,7 @@ public class Connector {
         noop = new Thread(() -> {
             while(client.isConnected()) {
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.SECONDS.sleep(10);
                     client.sendNoOp();
                 } catch (Exception e) {
                     e.printStackTrace();
