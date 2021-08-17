@@ -47,9 +47,15 @@ public class Download extends Packet implements PipeStream {
             }
         }
 
+        String pre = String.format("Successful: %d, Failed: %d. Saved file to %s" + merge(failed, "%nFailed: "), passed, failed.size(), download_dir);
+        if(failed.size() > 20) {
+            failed.removeAll(failed.subList(20, failed.size() - 1));
+        }
+
         JOptionPane.showMessageDialog(parser.getFrame().getDropField(),
-                String.format("Successful: %d, Failed: %d. Saved file to %s%nFailed: " + merge(failed, "%nFailed: "), passed, failed.size(), download_dir),
+                pre + (failed.size() > 0 ? "\nFailed: " : "") + merge(failed, "\nFailed: ") + (failed.size() > 20 ? "\n..." : ""),
                 "Info", JOptionPane.INFORMATION_MESSAGE);
+
         progressBar.dispose();
 
         parser.refreshView(false);
@@ -105,6 +111,6 @@ public class Download extends Packet implements PipeStream {
             builder.append(s).append(mergeChar);
         }
 
-        return builder.toString().substring(0, builder.length() - 2);
+        return builder.toString().substring(0, builder.length() != 0 ? builder.length() - mergeChar.length() : 0);
     }
 }
